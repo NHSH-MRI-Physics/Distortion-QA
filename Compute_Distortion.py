@@ -15,28 +15,28 @@ def GetFudicalSpheres():
 	MaxValue = 0
 	DICOMS=[]
 	for file in DICOMFiles:
-	    LoadedDICOM = pydicom.read_file( file )
-	    if (LoadedDICOM.SeriesDescription == ExtractedSequence):
-	        DICOMS.append(LoadedDICOM)
-	        if ( np.max(DICOMS[-1].pixel_array) > MaxValue):
-	            MaxValue = np.max(DICOMS[-1].pixel_array)
+		LoadedDICOM = pydicom.read_file( file )
+		if (LoadedDICOM.SeriesDescription == ExtractedSequence):
+			DICOMS.append(LoadedDICOM)
+			if ( np.max(DICOMS[-1].pixel_array) > MaxValue):
+				MaxValue = np.max(DICOMS[-1].pixel_array)
 	DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False)
-	
+
 	#Put it into a 3d array for slicing
 	img_shape = list(DICOMS[0].pixel_array.shape)
 	img_shape.append(len(DICOMS))
 	img3d = np.zeros(img_shape)
 	for i, s in enumerate(DICOMS):
-	    img2d = s.pixel_array
-	    img3d[:, :, i] = img2d
+		img2d = s.pixel_array
+		img3d[:, :, i] = img2d
 	
 	
 	def GetSagSlice(SliceNumber):
-	    return img3d[:,:,SliceNumber]
+		return img3d[:,:,SliceNumber]
 	def GetAxialSLice(SliceNumber):
-	    return img3d[SliceNumber,:,:]
+		return img3d[SliceNumber,:,:]
 	def GetCorSlice(SliceNumber):
-	    return img3d[:,SliceNumber,:]
+		return img3d[:,SliceNumber,:]
 	
 	
 	
