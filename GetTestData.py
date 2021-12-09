@@ -7,11 +7,11 @@ import math
 from shutil import copyfile
 
 DICOMFiles = glob.glob('./PhantomData/*')
-ExtractedSequence = "3D Sag T1 BRAVO"
+ExtractedSequence = "3D Sag T1 BRAVO Geom Core"
 MaxValue = 0
 DICOMS=[]
 for file in DICOMFiles:
     LoadedDICOM = pydicom.read_file( file )
     if (LoadedDICOM.SeriesDescription == ExtractedSequence):
-        #print (file)
-        copyfile(file,"TestImages/"+file.split("/")[-1])
+        print (file)
+        copyfile(file,"TestData/"+file.split("/")[-1])
