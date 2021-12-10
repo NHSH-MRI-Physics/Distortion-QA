@@ -104,7 +104,7 @@ def ComputerIntraPlateDistances(SphereLocations):
 		SlicePositions.append(average/len(plateXYZ))
 	
 	pos=0
-	for plate in SphereLocations[:5]:
+	for plate in SphereLocations:
 		x=[]
 		y=[]
 		z=[]
