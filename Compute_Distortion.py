@@ -43,19 +43,19 @@ def GetCorSlice(SliceNumber):
 def GetSphereCentres(SliceLocCentre,NumberOfSpheresExpected,SearchWidth=4.688):
 	SearchSize = int(round(SearchWidth/VoxelSize[1]))
 	#BuildHistogram
-	HighestThresh = 0
+	ChosenThresh = sys.maxsize
 	for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 		Image = GetCorSlice(i)
 		thresh = threshold_minimum(Image)
-		if (thresh > HighestThresh):
-			HighestThresh=thresh
+		if (thresh < ChosenThresh):
+			ChosenThresh=thresh
 			
 	#Get list of 3d points for kmeans clustering
 	points = []
 	for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 		z=i
 		Image = GetCorSlice(i)
-		Binary_Image = Image > HighestThresh*0.6 #To high and you miss spheres, to low and you may pick up background noise, maybe this should be the lowest thresh or maybe a list of thresholds for each image?
+		Binary_Image = Image > ChosenThresh*1 #To high and you miss spheres, to low and you may pick up background noise, maybe this should be the lowest thresh or maybe a list of thresholds for each image?
 		Coords = np.argwhere(Binary_Image != 0)
 		z_coords = np.ones( (Coords.shape[0],1),dtype=int )*z
 		Coords = np.append(Coords,z_coords,axis=1)
