@@ -10,9 +10,24 @@ NoDitsortionAnalysis = Analysis.AnalysisResults("No_Distortion",ComputeDistortio
 NoDitsortionAnalysis.DistortionAnalysis()
 NoDitsortionAnalysis.PrintToScreen()
 
-#ComputeDistortionShimOff = Compute_Distortion.DistortionCalculation("TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off")
-#Analysis.DistortionAnalysis(ComputeDistortionShimOff, "Distortion")
 
 
-#ComputeDistortionNoGeoCorr = Compute_Distortion.DistortionCalculation("TestDataNoCor" , "3D Sag T1 BRAVO")
-#Analysis.DistortionAnalysis(ComputeDistortionNoGeoCorr, "NoGeometryCorrection")
+print (" ")
+ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation("TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off")
+ComputeDistortionGeoCorrection.GetFudicalSpheres()
+
+#Pass the distortion calc to the analysis class for well analysis...
+NoDitsortionAnalysis = Analysis.AnalysisResults("Distortion",ComputeDistortionGeoCorrection)
+NoDitsortionAnalysis.DistortionAnalysis()
+NoDitsortionAnalysis.PrintToScreen()
+
+
+
+print (" ")
+ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation("TestDataNoCor" , "3D Sag T1 BRAVO")
+ComputeDistortionGeoCorrection.GetFudicalSpheres()
+
+#Pass the distortion calc to the analysis class for well analysis...
+NoDitsortionAnalysis = Analysis.AnalysisResults("No_Correction",ComputeDistortionGeoCorrection)
+NoDitsortionAnalysis.DistortionAnalysis()
+NoDitsortionAnalysis.PrintToScreen()

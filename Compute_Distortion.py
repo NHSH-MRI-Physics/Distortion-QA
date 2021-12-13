@@ -359,6 +359,8 @@ class DistortionCalculation:
 		col = delta.index(min(delta))
 		return [row,col]
 	
+
+	
 	def distanceCalc(self, xyz1,xyz2):
 		dx = (xyz1[0] - xyz2[0]) * self.VoxelSize[2] #Sag
 		dy = (xyz1[1] - xyz2[1]) * self.VoxelSize[0] #Axial
@@ -473,13 +475,132 @@ class DistortionCalculation:
 			
 		distances +=InterPlateLongDistance
 		ResultObj = Result(distances,fig)
-		
-		
-		
-		
 			
 		return ResultObj
 			
+	
+	def DetermineRowColDepthOfPoint(self, x,y,z,depthLines,rowLines,colLines):
+		
+		delta=[]
+		for I in range(0,len(rowLines)):
+			delta.append( np.abs(rowLines[I] - y) )
+		row= delta.index(min(delta))
+		delta=[]
+		for I in range(0,len(colLines)):
+			delta.append( np.abs(colLines[I] - z))
+		col = delta.index(min(delta))
+		delta=[]
+		for I in range(0,len(depthLines)):
+			delta.append( np.abs(depthLines[I] - x))
+		depth = delta.index(min(delta))
+		
+		return [row,col,depth]
+	
+
+	# Hopefully the last version...
+	#In this instance we compute distance of all spheres interplate instead of just within one plane like in V2.
+	def ComputerInterPlateDistancesV3(self,SphereLocations):
+		SlicePositions=[]
+		for plateXYZ in SphereLocations:
+			average=0
+			for XYZ in plateXYZ:
+				average += XYZ[2]
+			SlicePositions.append(average/len(plateXYZ))
+		
+		
+		MidWaySlice = int(round(self.img_shape[2]/2))
+		x=[]
+		y=[]
+		z=[]
+		
+		for plate in SphereLocations:
+			for xyz in plate:
+				x.append([xyz[0]])
+				y.append([xyz[1]])
+				z.append([xyz[2]])
+			
+		#we know the number and rows and cols in this case 
+		kmeansCols  = KMeans(n_clusters=5, random_state=0).fit(z)
+		kmeansRows  = KMeans(n_clusters=5, random_state=0).fit(y)
+		kmeansDepth = KMeans(n_clusters=5, random_state=0).fit(x)
+		
+		
+		colLines = []
+		for i in range(5):
+			temp = []
+			for j in range(len(kmeansCols.labels_)):
+				if kmeansCols.labels_[j] == i:
+					temp.append(z[j][0])
+			colLines.append(sum(temp)/len(temp))
+		colLines=sorted(colLines)
+			
+		rowLines = []
+		for i in range(5):
+			temp = []
+			for j in range(len(kmeansRows.labels_)):
+				if kmeansRows.labels_[j] == i:
+					temp.append(y[j][0])
+			rowLines.append(sum(temp)/len(temp))
+		rowLines=sorted(rowLines)
+		
+		depthLines = []
+		for i in range(5):
+			temp = []
+			for j in range(len(kmeansDepth.labels_)):
+				if kmeansDepth.labels_[j] == i:
+					temp.append(x[j][0])
+			depthLines.append(sum(temp)/len(temp))
+		depthLines=sorted(depthLines)
+		
+		distances = []
+		for col in range(0,4):
+			for i in range(len(x)):
+				xyz = [x[i][0],y[i][0],z[i][0]]
+				RowColDepth = self.DetermineRowColDepthOfPoint(xyz[0],xyz[1],xyz[2],depthLines,rowLines,colLines)
+				if (RowColDepth[1]==col): #Get the right col
+					for j in range(len(x)):
+						xyz_ref = [x[j][0],y[j][0],z[j][0]]
+						RowColDepth_ref = self.DetermineRowColDepthOfPoint(xyz_ref[0],xyz_ref[1],xyz_ref[2],depthLines,rowLines,colLines)
+						if ( RowColDepth_ref[1] > RowColDepth[1]): 
+								distance = self.distanceCalc(xyz,xyz_ref)
+								expecteddistance = math.sqrt( ((RowColDepth_ref[0]-RowColDepth[0])*40)**2 + ((RowColDepth_ref[1]-RowColDepth[1])*40)**2 + ((RowColDepth_ref[2]-RowColDepth[2])*40)**2 )
+								
+								DistanceResultObj = DistanceResult(RowColDepth_ref,RowColDepth,distance,expecteddistance)
+								distances.append(DistanceResultObj)
+
+		Image = self.GetSagSlice(MidWaySlice)
+		plt.imshow(Image)
+		fig = plt.gcf()
+		fig.set_size_inches(30, 30)
+		#plt.imshow(Image)
+		
+		for i in SlicePositions:
+			plt.axvline(x=i)
+		
+
+		y=self.img_shape[0]*0.6
+		ArrowAverages = []
+		for col in range(0,4):
+			average = []
+			for i in range(0,len(distances)):
+				if (distances[i].StartingPoint[1] == col):
+					#print (distances[i])
+					if (distances[i].refPoint[2]==2 and distances[i].StartingPoint[2]==2):
+						if (distances[i].refPoint[0]==distances[i].StartingPoint[0]):
+							if ( (distances[i].refPoint[1]-distances[i].StartingPoint[1]) == 1): 
+								average.append(distances[i].Distance)
+			ArrowAverages.append( (sum(average)/len(average)) )
+						
+		
+		for i in range(0,len(SlicePositions)-1):
+			plt.arrow(x=SlicePositions[i], y=y, dx=SlicePositions[i+1]-SlicePositions[i], dy=0, width=5,length_includes_head=True) 
+			plt.annotate( str(round(ArrowAverages[i],2))+"mm", xy = ( (SlicePositions[i]+SlicePositions[i+1])/2, y-10),fontsize=50,ha='center',color="orange") 
+			y-=30
+
+
+		ResultObj = Result(distances,fig)
+		
+		return ResultObj
 		
 		
 	def GetFudicalSpheres(self):
@@ -529,7 +650,7 @@ class DistortionCalculation:
 			SphereLocations.append(Spheres)
 	
 			
-		InterPlateResults = self.ComputerInterPlateDistancesV2(SphereLocations) 
+		InterPlateResults = self.ComputerInterPlateDistancesV3(SphereLocations) 
 		plt.close()
 		
 		IntraPlateResults = self.ComputerIntraPlateDistances(SphereLocations) 
