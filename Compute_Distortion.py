@@ -40,7 +40,8 @@ def GetCorSlice(SliceNumber):
 	return np.flip(img3d[:,SliceNumber,:], axis=1)
 
 
-def GetSphereCentres(SliceLocCentre,NumberOfSpheresExpected,SearchSize=10):
+def GetSphereCentres(SliceLocCentre,NumberOfSpheresExpected,SearchWidth=4.688):
+	SearchSize = int(round(SearchWidth/VoxelSize[1]))
 	#BuildHistogram
 	HighestThresh = 0
 	for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
@@ -54,13 +55,15 @@ def GetSphereCentres(SliceLocCentre,NumberOfSpheresExpected,SearchSize=10):
 	for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 		z=i
 		Image = GetCorSlice(i)
-		Binary_Image = Image > HighestThresh*0.5
+		Binary_Image = Image > HighestThresh*0.6 #To high and you miss spheres, to low and you may pick up background noise, maybe this should be the lowest thresh or maybe a list of thresholds for each image?
 		Coords = np.argwhere(Binary_Image != 0)
 		z_coords = np.ones( (Coords.shape[0],1),dtype=int )*z
 		Coords = np.append(Coords,z_coords,axis=1)
 		for xyz in Coords:
 			points.append(xyz)
 	points=np.array(points)
+	
+	
 	
 	Spheres = []
 	kmeans = KMeans(n_clusters=NumberOfSpheresExpected, random_state=0).fit(points)
@@ -87,6 +90,7 @@ def GetSphereCentres(SliceLocCentre,NumberOfSpheresExpected,SearchSize=10):
 			plt.plot(xyz[0], xyz[1], 'b+')
 		plt.show()
 	'''
+	
 	
 	#Return all the coords
 	
@@ -409,6 +413,7 @@ def ComputerInterPlateDistancesV2(SphereLocations):
 	#Iterate over each col 
 	#then find each sphere that is in the same row but the next col
 	distances=[]
+	InterPlateLongDistance = []
 	for col in range(0,4):
 		averagedistance=[]
 		for i in range(len(x)):
@@ -423,6 +428,14 @@ def ComputerInterPlateDistancesV2(SphereLocations):
 						#compute distance
 						distance = distanceCalc(xyz,xyz_ref)
 						averagedistance.append(distance)
+						
+					#work out thed distance right across the image
+					#Oppisite columns but same row
+					
+					if (RowCol[1]==0 and RowCol_ref[1]==4):
+						if (RowCol[0]==RowCol_ref[0]):
+							distance = distanceCalc(xyz,xyz_ref)
+							InterPlateLongDistance.append(DistanceResult(RowCol,RowCol_ref,distance,160))
 		
 		
 		DistanceResultObj= DistanceResult([col],[col+1],sum(averagedistance)/len(averagedistance),40)
@@ -446,8 +459,12 @@ def ComputerInterPlateDistancesV2(SphereLocations):
 		y-=30
 		
 	ResultObj = Result(distances,fig)
+	
+	
+	
+	
 		
-	return ResultObj
+	return [ResultObj,InterPlateLongDistance]
 		
 	
 	
@@ -455,9 +472,17 @@ def GetFudicalSpheres():
 	global img3d
 	global VoxelSize
 	global img_shape
-	#DICOMFiles = glob.glob('./PhantomData/*')
+	#CleanData
 	DICOMFiles = glob.glob('./TestData/*')
 	ExtractedSequence = "3D Sag T1 BRAVO Geom Core"
+	
+	#Distorted Data
+	#DICOMFiles = glob.glob('./TestDistoredData/*')
+	#ExtractedSequence = "3D Sag T1 BRAVO BW=15 Shim off"
+	
+	#No Distortion Correction
+	#DICOMFiles = glob.glob('./TestDataNoCor/*')
+	#ExtractedSequence = "3D Sag T1 BRAVO"
 	
 	#Load in all DICOM slices
 	MaxValue = 0
@@ -497,8 +522,9 @@ def GetFudicalSpheres():
 
 		
 	InterPlateResults = ComputerInterPlateDistancesV2(SphereLocations) 
-	InterPlateResults.Image.savefig("InterplateDistances.png")
+	InterPlateResults[0].Image.savefig("InterplateDistances.png")
 	plt.close()
+	
 	
 	platenum=1
 	IntraPlateResults = ComputerIntraPlateDistances(SphereLocations) 
@@ -508,7 +534,12 @@ def GetFudicalSpheres():
 		
 		
 	Distortion=[]
-	for result in InterPlateResults.DistanceResults:
+	for result in InterPlateResults[0].DistanceResults:
+		Distortion.append(np.abs(result.Distance - result.ExpectedDistance))
+	print (max(Distortion))
+	
+	Distortion=[]
+	for result in InterPlateResults[1]:
 		Distortion.append(np.abs(result.Distance - result.ExpectedDistance))
 	print (max(Distortion))
 	
