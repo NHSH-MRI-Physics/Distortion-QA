@@ -18,10 +18,13 @@ import matplotlib
 
 @dataclass
 class DistanceResult:
-	refPoint: list
-	StartingPoint: list
+	Point1: list
+	Point2: list
 	Distance: float
 	ExpectedDistance: float
+	
+	Point1InSpace: list
+	Point2InSpace: list
 	
 
 
@@ -44,7 +47,17 @@ class DistortionCalculation:
 		self.SequenceName= SequenceName
 		
 		
+	def AdjustPoint(self,PointGuess,NewPoint):
 		
+		for plateIdx in range(len(self.SphereLocations)):
+			
+			for pointIdx in range(len(self.SphereLocations[plateIdx])):
+				distance = math.sqrt((PointGuess[0]-self.SphereLocations[plateIdx][pointIdx][0])**2 + (PointGuess[1]-self.SphereLocations[plateIdx][pointIdx][1])**2 +(PointGuess[2]-self.SphereLocations[plateIdx][pointIdx][2])**2 )
+				if distance < 10:
+					self.SphereLocations[plateIdx][pointIdx]=NewPoint
+					return 
+		
+		print ("Warning No Point Found :(")
 	
 	
 	def GetSagSlice(self,SliceNumber):
@@ -180,7 +193,7 @@ class DistortionCalculation:
 									distance = self.distanceCalc(xyz,xyz_ref)
 									expecteddistance = math.sqrt( ((RowCol_ref[0]-RowCol[0])*40)**2 + ((RowCol_ref[1]-RowCol[1])*40)**2)
 									
-									DistanceResultObj = DistanceResult(RowCol_ref,RowCol,distance,expecteddistance)
+									DistanceResultObj = DistanceResult(RowCol_ref,RowCol,distance,expecteddistance,xyz,xyz_ref)
 									DistResObjs.append(DistanceResultObj)
 		
 									#hardCoded arrow drawning...
@@ -301,7 +314,7 @@ class DistortionCalculation:
 			links=[]
 			
 			for j in range(len(distances)):
-				link = [distances[j].refPoint, distances[j].StartingPoint] 
+				link = [distances[j].Point1, distances[j].Point2] 
 				link_reverse = link[::-1]
 				
 				if (link in links or link_reverse in links):
@@ -453,10 +466,10 @@ class DistortionCalculation:
 						if (RowCol[1]==0 and RowCol_ref[1]==4):
 							if (RowCol[0]==RowCol_ref[0]):
 								distance = self.distanceCalc(xyz,xyz_ref)
-								InterPlateLongDistance.append(DistanceResult(RowCol,RowCol_ref,distance,160))
+								InterPlateLongDistance.append(DistanceResult(RowCol,RowCol_ref,distance,160,xyz,xyz_ref))
 			
 			
-			DistanceResultObj= DistanceResult([col],[col+1],sum(averagedistance)/len(averagedistance),40)
+			DistanceResultObj= DistanceResult([col],[col+1],sum(averagedistance)/len(averagedistance),40,xyz,xyz_ref)
 			#distances.append(sum(averagedistance)/len(averagedistance))
 			distances.append(DistanceResultObj)
 				
@@ -568,7 +581,7 @@ class DistortionCalculation:
 								distance = self.distanceCalc(xyz,xyz_ref)
 								expecteddistance = math.sqrt( ((RowColDepth_ref[0]-RowColDepth[0])*40)**2 + ((RowColDepth_ref[1]-RowColDepth[1])*40)**2 + ((RowColDepth_ref[2]-RowColDepth[2])*40)**2 )
 								
-								DistanceResultObj = DistanceResult(RowColDepth_ref,RowColDepth,distance,expecteddistance)
+								DistanceResultObj = DistanceResult(RowColDepth_ref,RowColDepth,distance,expecteddistance,xyz,xyz_ref)
 								distances.append(DistanceResultObj)
 
 		plt.ioff()
@@ -586,11 +599,11 @@ class DistortionCalculation:
 		for col in range(0,4):
 			average = []
 			for i in range(0,len(distances)):
-				if (distances[i].StartingPoint[1] == col):
+				if (distances[i].Point2[1] == col):
 					#print (distances[i])
-					if (distances[i].refPoint[2]==2 and distances[i].StartingPoint[2]==2):
-						if (distances[i].refPoint[0]==distances[i].StartingPoint[0]):
-							if ( (distances[i].refPoint[1]-distances[i].StartingPoint[1]) == 1): 
+					if (distances[i].Point1[2]==2 and distances[i].Point2[2]==2):
+						if (distances[i].Point1[0]==distances[i].Point2[0]):
+							if ( (distances[i].Point1[1]-distances[i].Point2[1]) == 1): 
 								average.append(distances[i].Distance)
 			ArrowAverages.append( (sum(average)/len(average)) )
 						
@@ -662,7 +675,11 @@ class DistortionCalculation:
 		
 		IntraPlateResults = self.ComputerIntraPlateDistances(self.SphereLocations) 
 			
+		#Adjust point1 and point 2 so its [Sag,Ax,Cor]
+		
 		self.InterPlateResults = InterPlateResults
 		self.IntraPlateResults = IntraPlateResults
+		
+		
 		
 

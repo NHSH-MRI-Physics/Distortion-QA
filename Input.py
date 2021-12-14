@@ -8,8 +8,8 @@ NoDitsortionAnalysis = Analysis.AnalysisResults("No_Distortion",ComputeDistortio
 
 
 ComputeDistortionGeoCorrection.GetFudicalSpheres()
-NoDitsortionAnalysis.CheckPoints()
-sys.exit()
+#ComputeDistortionGeoCorrection.AdjustPoint([121,263,85],[156,263,85])
+#NoDitsortionAnalysis.CheckPoints()
 
 ComputeDistortionGeoCorrection.GetDistances()
 
@@ -17,6 +17,7 @@ ComputeDistortionGeoCorrection.GetDistances()
 
 NoDitsortionAnalysis.DistortionAnalysis()
 NoDitsortionAnalysis.PrintToScreen()
+#NoDitsortionAnalysis.Show3dModel("Intraplate Max Percentage Distortion")
 
 
 '''
