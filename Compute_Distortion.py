@@ -22,6 +22,7 @@ class DistanceResult:
 	StartingPoint: list
 	Distance: float
 	ExpectedDistance: float
+	
 
 
 @dataclass
@@ -36,11 +37,12 @@ class DistortionCalculation:
 		self.img3d = None
 		self.VoxelSize=None
 		self.img_shape=None
-		
+		self.SphereLocations=None
 		self.InterPlateResults=None
 		self.IntraPlateResults=None
 		self.folder= './'+folder+'/*'
 		self.SequenceName= SequenceName
+		
 		
 		
 	
@@ -651,14 +653,16 @@ class DistortionCalculation:
 			Spheres= self.GetSphereCentres(Plates[plate],SpheresPerPlate[plate])
 			SphereLocations.append(Spheres)
 	
-			
-		InterPlateResults = self.ComputerInterPlateDistancesV3(SphereLocations) 
+		self.SphereLocations = SphereLocations
+
+
+	def GetDistances(self):
+		InterPlateResults = self.ComputerInterPlateDistancesV3(self.SphereLocations) 
 		plt.close()
 		
-		IntraPlateResults = self.ComputerIntraPlateDistances(SphereLocations) 
+		IntraPlateResults = self.ComputerIntraPlateDistances(self.SphereLocations) 
 			
 		self.InterPlateResults = InterPlateResults
 		self.IntraPlateResults = IntraPlateResults
-
-
+		
 
