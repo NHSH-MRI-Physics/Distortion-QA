@@ -274,7 +274,7 @@ class DistortionCalculation:
 											plt.arrow(x=xyz[0], y=xyz[1], dx=xyz_ref[0]-xyz[0], dy=xyz_ref[1]-xyz[1], width=widthArrow,length_includes_head=True) 
 											plt.annotate( str(round(distance,2))+"mm", xy = ( (xyz[0]+xyz_ref[0])/2, (xyz[1]+xyz_ref[1])/2) ,fontsize=fontsize,ha='center',color="orange") 
 											
-											
+			plt.ioff()			
 			for i in colLines:
 				plt.axvline(x=i)
 			for i in rowLines:
@@ -283,7 +283,8 @@ class DistortionCalculation:
 			fig = plt.gcf()
 			fig.set_size_inches(30, 30)
 			plt.imshow(Image)
-			plt.show()
+			plt.close()
+			#plt.show()
 			
 			ResultObj = Result(DistResObjs,fig)
 			ResultsForAllPlates.append(ResultObj)
@@ -568,11 +569,11 @@ class DistortionCalculation:
 								DistanceResultObj = DistanceResult(RowColDepth_ref,RowColDepth,distance,expecteddistance)
 								distances.append(DistanceResultObj)
 
+		plt.ioff()
 		Image = self.GetSagSlice(MidWaySlice)
+		fig = plt.figure()
 		plt.imshow(Image)
-		fig = plt.gcf()
 		fig.set_size_inches(30, 30)
-		#plt.imshow(Image)
 		
 		for i in SlicePositions:
 			plt.axvline(x=i)
@@ -596,7 +597,8 @@ class DistortionCalculation:
 			plt.arrow(x=SlicePositions[i], y=y, dx=SlicePositions[i+1]-SlicePositions[i], dy=0, width=5,length_includes_head=True) 
 			plt.annotate( str(round(ArrowAverages[i],2))+"mm", xy = ( (SlicePositions[i]+SlicePositions[i+1])/2, y-10),fontsize=50,ha='center',color="orange") 
 			y-=30
-
+		
+		plt.close(fig)
 
 		ResultObj = Result(distances,fig)
 		

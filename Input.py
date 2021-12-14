@@ -11,7 +11,7 @@ NoDitsortionAnalysis.DistortionAnalysis()
 NoDitsortionAnalysis.PrintToScreen()
 
 
-
+'''
 print (" ")
 ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation("TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off")
 ComputeDistortionGeoCorrection.GetFudicalSpheres()
@@ -31,3 +31,4 @@ ComputeDistortionGeoCorrection.GetFudicalSpheres()
 NoDitsortionAnalysis = Analysis.AnalysisResults("No_Correction",ComputeDistortionGeoCorrection)
 NoDitsortionAnalysis.DistortionAnalysis()
 NoDitsortionAnalysis.PrintToScreen()
+'''
