@@ -9,6 +9,7 @@ import sys
 from sklearn.cluster import KMeans
 from dataclasses import dataclass
 import matplotlib
+import copy
 
 #The coordiantes are very confusing...
 #I think
@@ -45,6 +46,7 @@ class DistortionCalculation:
 		self.IntraPlateResults=None
 		self.folder= './'+folder+'/*'
 		self.SequenceName= SequenceName
+		self.StudyTimeDate=None
 		
 		
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -68,7 +70,7 @@ class DistortionCalculation:
 		return np.flip(self.img3d[:,SliceNumber,:], axis=1)
 	
 	
-	def GetSphereCentres(self, SliceLocCentre,NumberOfSpheresExpected,SearchWidth=4.688):
+	def __GetSphereCentres(self, SliceLocCentre,NumberOfSpheresExpected,SearchWidth=4.688):
 		SearchSize = int(round(SearchWidth/self.VoxelSize[1]))
 		#BuildHistogram
 		ChosenThresh = sys.maxsize
@@ -124,7 +126,7 @@ class DistortionCalculation:
 		
 		return Spheres
 		
-	def ComputerIntraPlateDistances(self, SphereLocations):
+	def __ComputerIntraPlateDistances(self, SphereLocations):
 		
 		ResultsForAllPlates=[]
 		
@@ -181,19 +183,19 @@ class DistortionCalculation:
 	
 				for i in range(len(x)):
 					xyz = [x[i][0],y[i][0],z[i][0]]
-					RowCol = self.DetermineRowColOfPoint(xyz[1],xyz[0],rowLines,colLines)
+					RowCol = self.__DetermineRowColOfPoint(xyz[1],xyz[0],rowLines,colLines)
 					targetRowCol = [RowCol[0],RowCol[1]+1]
 	
 					if (RowCol[1]==col): #Get the right col
 						for j in range(len(x)):
 							xyz_ref = [x[j][0],y[j][0],z[j][0]]
-							RowCol_ref = self.DetermineRowColOfPoint(xyz_ref[1],xyz_ref[0],rowLines,colLines)
+							RowCol_ref = self.__DetermineRowColOfPoint(xyz_ref[1],xyz_ref[0],rowLines,colLines)
 							if ((RowCol_ref[1] - RowCol[1]) >=0): # find any points in the same col or to the right
 								if (RowCol_ref != RowCol): #Dont calc distances to the same point
-									distance = self.distanceCalc(xyz,xyz_ref)
+									distance = self.__distanceCalc(xyz,xyz_ref)
 									expecteddistance = math.sqrt( ((RowCol_ref[0]-RowCol[0])*40)**2 + ((RowCol_ref[1]-RowCol[1])*40)**2)
 									
-									DistanceResultObj = DistanceResult(RowCol_ref,RowCol,distance,expecteddistance,xyz,xyz_ref)
+									DistanceResultObj = DistanceResult(copy.deepcopy(RowCol_ref),copy.deepcopy(RowCol),distance,expecteddistance,xyz,xyz_ref)
 									DistResObjs.append(DistanceResultObj)
 		
 									#hardCoded arrow drawning...
@@ -331,7 +333,7 @@ class DistortionCalculation:
 	
 	
 	#Original attempt, this method takes the average of the spheres in the z direction and compute distance between these lines
-	def ComputerInterPlateDistancesV1(self, SphereLocations):
+	def __ComputerInterPlateDistancesV1(self, SphereLocations):
 		SlicePositions=[]
 		for plateXYZ in SphereLocations:
 			average=0
@@ -364,7 +366,7 @@ class DistortionCalculation:
 		return distances,fig
 		
 	
-	def DetermineRowColOfPoint(self, y,x,rowLines,colLines):
+	def __DetermineRowColOfPoint(self, y,x,rowLines,colLines):
 		delta=[]
 		for I in range(0,len(rowLines)):
 			delta.append( np.abs(rowLines[I] - y) )
@@ -377,7 +379,7 @@ class DistortionCalculation:
 	
 
 	
-	def distanceCalc(self, xyz1,xyz2):
+	def __distanceCalc(self, xyz1,xyz2):
 		dx = (xyz1[0] - xyz2[0]) * self.VoxelSize[2] #Sag
 		dy = (xyz1[1] - xyz2[1]) * self.VoxelSize[0] #Axial
 		dz = (xyz1[2] - xyz2[2]) * self.VoxelSize[1] #Cor This may be wrong so might be wroth checking if things go weird....
@@ -385,7 +387,7 @@ class DistortionCalculation:
 		return dist
 	
 	#Maybe better attempt computes the average distance between spheres in 3d
-	def ComputerInterPlateDistancesV2(self,SphereLocations):
+	def __ComputerInterPlateDistancesV2(self,SphereLocations):
 		SlicePositions=[]
 		for plateXYZ in SphereLocations:
 			average=0
@@ -495,7 +497,7 @@ class DistortionCalculation:
 		return ResultObj
 			
 	
-	def DetermineRowColDepthOfPoint(self, x,y,z,depthLines,rowLines,colLines):
+	def __DetermineRowColDepthOfPoint(self, x,y,z,depthLines,rowLines,colLines):
 		
 		delta=[]
 		for I in range(0,len(rowLines)):
@@ -515,7 +517,7 @@ class DistortionCalculation:
 
 	# Hopefully the last version...
 	#In this instance we compute distance of all spheres interplate instead of just within one plane like in V2.
-	def ComputerInterPlateDistancesV3(self,SphereLocations):
+	def __ComputerInterPlateDistancesV3(self,SphereLocations):
 		SlicePositions=[]
 		for plateXYZ in SphereLocations:
 			average=0
@@ -572,16 +574,16 @@ class DistortionCalculation:
 		for col in range(0,4):
 			for i in range(len(x)):
 				xyz = [x[i][0],y[i][0],z[i][0]]
-				RowColDepth = self.DetermineRowColDepthOfPoint(xyz[0],xyz[1],xyz[2],depthLines,rowLines,colLines)
+				RowColDepth = self.__DetermineRowColDepthOfPoint(xyz[0],xyz[1],xyz[2],depthLines,rowLines,colLines)
 				if (RowColDepth[1]==col): #Get the right col
 					for j in range(len(x)):
 						xyz_ref = [x[j][0],y[j][0],z[j][0]]
-						RowColDepth_ref = self.DetermineRowColDepthOfPoint(xyz_ref[0],xyz_ref[1],xyz_ref[2],depthLines,rowLines,colLines)
+						RowColDepth_ref = self.__DetermineRowColDepthOfPoint(xyz_ref[0],xyz_ref[1],xyz_ref[2],depthLines,rowLines,colLines)
 						if ( RowColDepth_ref[1] > RowColDepth[1]): 
-								distance = self.distanceCalc(xyz,xyz_ref)
+								distance = self.__distanceCalc(xyz,xyz_ref)
 								expecteddistance = math.sqrt( ((RowColDepth_ref[0]-RowColDepth[0])*40)**2 + ((RowColDepth_ref[1]-RowColDepth[1])*40)**2 + ((RowColDepth_ref[2]-RowColDepth[2])*40)**2 )
 								
-								DistanceResultObj = DistanceResult(RowColDepth_ref,RowColDepth,distance,expecteddistance,xyz,xyz_ref)
+								DistanceResultObj = DistanceResult(copy.deepcopy(RowColDepth_ref),copy.deepcopy(RowColDepth),distance,expecteddistance,xyz,xyz_ref)
 								distances.append(DistanceResultObj)
 
 		plt.ioff()
@@ -645,7 +647,7 @@ class DistortionCalculation:
 			img2d = s.pixel_array
 			img3d[:, :, i] = img2d
 			
-		
+
 		
 	
 		
@@ -663,19 +665,40 @@ class DistortionCalculation:
 		SpheresPerPlate = [4,13,21,13,5]
 		SphereLocations = [] #plate 1 to 5 in order
 		for plate in range(5):
-			Spheres= self.GetSphereCentres(Plates[plate],SpheresPerPlate[plate])
+			Spheres= self.__GetSphereCentres(Plates[plate],SpheresPerPlate[plate])
 			SphereLocations.append(Spheres)
 	
 		self.SphereLocations = SphereLocations
 
 
 	def GetDistances(self):
-		InterPlateResults = self.ComputerInterPlateDistancesV3(self.SphereLocations) 
+		InterPlateResults = self.__ComputerInterPlateDistancesV3(self.SphereLocations) 
 		plt.close()
 		
-		IntraPlateResults = self.ComputerIntraPlateDistances(self.SphereLocations) 
+		IntraPlateResults = self.__ComputerIntraPlateDistances(self.SphereLocations) 
 			
-		#Adjust point1 and point 2 so its [Sag,Ax,Cor]
+		
+		
+		#Adjust point1 and point 2 so its [Sag,Ax,Cor], means the xyz coords and the point index match up..
+		#Do interplate first convert from [Axial,Cor,Sag] -> [Sag,Ax,Cor]
+		for i in range(len(InterPlateResults.DistanceResults)):
+			temp = InterPlateResults.DistanceResults[i].Point1
+			InterPlateResults.DistanceResults[i].Point1=[temp[2],temp[0],temp[1]]
+			
+			temp = InterPlateResults.DistanceResults[i].Point2
+			InterPlateResults.DistanceResults[i].Point2=[temp[2],temp[0],temp[1]]
+			
+		for j in range(len(IntraPlateResults)):
+			for i in range(len(IntraPlateResults[j].DistanceResults)):
+				IntraPlateResults[j].DistanceResults[i].Point1.append(j)
+				IntraPlateResults[j].DistanceResults[i].Point2.append(j)
+				
+				temp = IntraPlateResults[j].DistanceResults[i].Point1
+				IntraPlateResults[j].DistanceResults[i].Point1=[temp[1],temp[0],temp[2]]
+			
+				temp = IntraPlateResults[j].DistanceResults[i].Point2
+				IntraPlateResults[j].DistanceResults[i].Point2=[temp[1],temp[0],temp[2]]
+		
 		
 		self.InterPlateResults = InterPlateResults
 		self.IntraPlateResults = IntraPlateResults

@@ -32,7 +32,7 @@ class AnalysisResults:
 		self.fig=None
 		self.curr_pos=0
 		
-	def key_event(self,e):
+	def __key_event(self,e):
 		if e.key == "right":
 			self.curr_pos = self.curr_pos + 1
 		elif e.key == "left":
@@ -54,7 +54,7 @@ class AnalysisResults:
 		
 	def CheckPoints(self):
 		self.fig = plt.figure()
-		self.fig.canvas.mpl_connect('key_press_event', self.key_event)
+		self.fig.canvas.mpl_connect('key_press_event', self.__key_event)
 		self.ax = self.fig.add_subplot(111)
 		self.ax.imshow(self.DistorCalcObj.GetCorSlice(0))
 		self.fig.suptitle("Slice Number " + str(self.curr_pos))
@@ -106,19 +106,46 @@ class AnalysisResults:
 				count+=1
 		
 		plt.show()
+		
+	def __GetStatString(self):
+		output=""
+		
+		output+= ("Interplate Stats\n") 
+		output+=("Interplate Max Distortion: " + str(self.Results["Interplate Max Distortion"][0]) +" mm\n")
+		output+=("Interplate Max Percentage Distortion: " + str(self.Results["Interplate Max Percentage Distortion"][0]) +" %\n")
+		output+=("Interplate Coefficient Of Variation: " + str(self.Results["Interplate Coefficient Of Variation"])+"\n")
+		
+		output+=("Interplate Max Distortion X: " + str(self.Results["Interplate Max Distortion X"][0]) +" mm\n")
+		output+=("Interplate Max Distortion Y: " + str(self.Results["Interplate Max Distortion Y"][0]) +" mm\n")
+		output+=("Interplate Max Distortion Z: " + str(self.Results["Interplate Max Distortion Z"][0]) +" mm\n")
+		
+		output+=("Interplate Coefficient Of Variation X: " + str(self.Results["Interplate Coefficient Of Variation X"])+"\n")
+		output+=("Interplate Coefficient Of Variation Y: " + str(self.Results["Interplate Coefficient Of Variation Y"])+"\n")
+		output+=("Interplate Coefficient Of Variation Z: " + str(self.Results["Interplate Coefficient Of Variation Z"])+"\n")
+		
+		output+= ("\n")
+		output+= ("Intraplate Stats")
+		output+=("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm\n")
+		output+=("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +"\n" )
+		output+=("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"]))+"\n")
+		
+		output+=("Intraplate Max Distortion X: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion X"])) +" mm\n")
+		output+=("Intraplate Max Distortion Y: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Y"])) +" mm\n")
+		output+=("Intraplate Max Distortion Z: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Z"])) +" mm\n")
+		
+		output+=("Intraplate Coefficient Of Variation X: " + str(max(self.Results["Intraplate Coefficient Of Variation X"]))+"\n")
+		output+=("Intraplate Coefficient Of Variation Y: " + str(max(self.Results["Intraplate Coefficient Of Variation Y"]))+"\n")
+		output+=("Intraplate Coefficient Of Variation Z: " + str(max(self.Results["Intraplate Coefficient Of Variation Z"]))+"\n")
+		
+		output+= ("\n")
+		
+		return output
 
 	def PrintToScreen(self):
-		print("Interplate Max Distortion: " + str(self.Results["Interplate Max Distortion"][0]) +" mm")
-		print("Interplate Max Percentage Distortion: " + str(self.Results["Interplate Max Percentage Distortion"][0]) +" %")
-		print("Interplate Coefficient Of Variation: " + str(self.Results["Interplate Coefficient Of Variation"]) +" %")
-		
-		print (  )
-		
-		print("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm")
-		print("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +" %")
-		print("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"])))
+		print (self.__GetStatString())
+
 	
-	def GetMaxDistortion(self, ResultsObj):
+	def __GetMaxDistortion(self, ResultsObj):
 		Distortion=[]
 		for result in ResultsObj.DistanceResults:
 			Distortion.append(np.abs(result.Distance - result.ExpectedDistance))
@@ -128,7 +155,7 @@ class AnalysisResults:
 		return [MaxDistortion,ResultsObj.DistanceResults[idx]]
 	
 	
-	def GetMaxPercentageDistortion(self, ResultsObj):
+	def __GetMaxPercentageDistortion(self, ResultsObj):
 		PercentageDistortion = []
 		for result in ResultsObj.DistanceResults:
 			PercentageDistortion.append( (result.Distance - result.ExpectedDistance)/result.ExpectedDistance)
@@ -137,38 +164,92 @@ class AnalysisResults:
 		idx = np.argmax(np.abs(PercentageDistortion))
 		return [MaxPercDistortion,ResultsObj.DistanceResults[idx]]
 	
-	def CoefficantOfVariation(self, ResultsObj):
+	def __CoefficantOfVariation(self, ResultsObj):
 		PercentageDistortion = []
 		for result in ResultsObj.DistanceResults:
-			PercentageDistortion.append( (result.Distance - result.ExpectedDistance)/result.ExpectedDistance)
+			PercentageDistortion.append( (result.Distance - result.ExpectedDistance))
 		return scipy.stats.variation(PercentageDistortion)
 	
-	def MaxDistortionInXYZ(self,ResultsObj):
+	
+	
+	
+	def __MaxDistortionInXYZ(self,ResultsObj):
 		dx=[] #Sag
 		dy=[] #Axial
 		dz=[] #Cor
+		
 		for result in ResultsObj.DistanceResults:
-			
 			DeltaX=np.abs(result.Point1[0]-result.Point2[0])
-			DeltaY=np.abs(result.Point1[0]-result.Point2[0])
-			DeltaZ=np.abs(result.Point1[0]-result.Point2[0])
+			DeltaY=np.abs(result.Point1[1]-result.Point2[1])
+			DeltaZ=np.abs(result.Point1[2]-result.Point2[2])
 			
-			DX=np.abs(result.Point1InSpace[0] - result.Point2InSpace[0])
-			DY=np.abs(result.Point1InSpace[1] - result.Point2InSpace[1])
-			DZ=np.abs(result.Point1InSpace[2] - result.Point2InSpace[2])
-			
+			DX=np.abs( (result.Point1InSpace[0] - result.Point2InSpace[0])*self.DistorCalcObj.VoxelSize[2])
+			DY=np.abs( (result.Point1InSpace[1] - result.Point2InSpace[1])*self.DistorCalcObj.VoxelSize[0])
+			DZ=np.abs( (result.Point1InSpace[2] - result.Point2InSpace[2])*self.DistorCalcObj.VoxelSize[1])
 
-			sys.exit()
 			dx.append(np.abs(DX-DeltaX*40))
 			dy.append(np.abs(DY-DeltaY*40))
 			dz.append(np.abs(DZ-DeltaZ*40))
 			
+		idxX = dx.index(max(dx))
+		idxY = dy.index(max(dy))
+		idxZ = dz.index(max(dz))
+		
+		result = [ [max(dx),ResultsObj.DistanceResults[idxX]] , [max(dy),ResultsObj.DistanceResults[idxY]] , [max(dz),ResultsObj.DistanceResults[idxZ] ] ]
+		
+		return result
+	
+	
+	def __MaxPercDistortionInXYZ(self,ResultsObj):
+		dx=[] #Sag
+		dy=[] #Axial
+		dz=[] #Cor
+		
+		for result in ResultsObj.DistanceResults:
+			DeltaX=np.abs(result.Point1[0]-result.Point2[0])
+			DeltaY=np.abs(result.Point1[1]-result.Point2[1])
+			DeltaZ=np.abs(result.Point1[2]-result.Point2[2])
 			
+			DX=np.abs( (result.Point1InSpace[0] - result.Point2InSpace[0])*self.DistorCalcObj.VoxelSize[2])
+			DY=np.abs( (result.Point1InSpace[1] - result.Point2InSpace[1])*self.DistorCalcObj.VoxelSize[0])
+			DZ=np.abs( (result.Point1InSpace[2] - result.Point2InSpace[2])*self.DistorCalcObj.VoxelSize[1])
+
+			dx.append( ((DX-DeltaX*40)/ (DeltaX*40))*100.0)
+			dy.append( ((DY-DeltaY*40)/ (DeltaY*40))*100.0)
+			dz.append( ((DZ-DeltaZ*40)/ (DeltaZ*40))*100.0)
+			
+		idxX = dx.index(max(dx))
+		idxY = dy.index(max(dy))
+		idxZ = dz.index(max(dz))
+		
+		result = [ [max(dx),ResultsObj.DistanceResults[idxX]] , [max(dy),ResultsObj.DistanceResults[idxY]] , [max(dz),ResultsObj.DistanceResults[idxZ] ] ]
+		
+		return result
+	
+	def __CoefficantOfVariationXYZ(self,ResultsObj):
+		dx=[] #Sag
+		dy=[] #Axial
+		dz=[] #Cor
+		
+		for result in ResultsObj.DistanceResults:
+			DeltaX=np.abs(result.Point1[0]-result.Point2[0])
+			DeltaY=np.abs(result.Point1[1]-result.Point2[1])
+			DeltaZ=np.abs(result.Point1[2]-result.Point2[2])
+			
+			DX=np.abs( (result.Point1InSpace[0] - result.Point2InSpace[0])*self.DistorCalcObj.VoxelSize[2])
+			DY=np.abs( (result.Point1InSpace[1] - result.Point2InSpace[1])*self.DistorCalcObj.VoxelSize[0])
+			DZ=np.abs( (result.Point1InSpace[2] - result.Point2InSpace[2])*self.DistorCalcObj.VoxelSize[1])
+
+			dx.append((DX-DeltaX*40))
+			dy.append((DY-DeltaY*40))
+			dz.append((DZ-DeltaZ*40))
+			
+		return [scipy.stats.variation(dx),scipy.stats.variation(dy),scipy.stats.variation(dz)]
+		
 		
 	
 	def DistortionAnalysis (self):
 		print ("Computing: " + self.CalcName)
-		#self.DistorCalcObj.GetFudicalSpheres()
 		self.DistorCalcObj.InterPlateResults.Image.savefig(self.CalcName+"_InterplateDistances.png")
 		platenum=1
 		for result in self.DistorCalcObj.IntraPlateResults:
@@ -176,23 +257,55 @@ class AnalysisResults:
 			platenum+=1
 			
 		
+		#Inter results
+		self.Results["Interplate Max Distortion"] = self.__GetMaxDistortion(self.DistorCalcObj.InterPlateResults)
+		self.Results["Interplate Max Percentage Distortion"] = self.__GetMaxPercentageDistortion(self.DistorCalcObj.InterPlateResults)
+		self.Results["Interplate Coefficient Of Variation"] = self.__CoefficantOfVariation(self.DistorCalcObj.InterPlateResults)
 		
-		self.Results["Interplate Max Distortion"] = self.GetMaxDistortion(self.DistorCalcObj.InterPlateResults)
-		self.Results["Interplate Max Percentage Distortion"] = self.GetMaxPercentageDistortion(self.DistorCalcObj.InterPlateResults)
-		self.Results["Interplate Coefficient Of Variation"] = self.CoefficantOfVariation(self.DistorCalcObj.InterPlateResults)
+		XYZResult = self.__MaxDistortionInXYZ(self.DistorCalcObj.InterPlateResults)
+		self.Results["Interplate Max Distortion X"] = XYZResult[0]
+		self.Results["Interplate Max Distortion Y"] = XYZResult[1]
+		self.Results["Interplate Max Distortion Z"] = XYZResult[2]
 		
+		XYZResult = self.__CoefficantOfVariationXYZ(self.DistorCalcObj.InterPlateResults)
+		self.Results["Interplate Coefficient Of Variation X"] = XYZResult[0]
+		self.Results["Interplate Coefficient Of Variation Y"] = XYZResult[1]
+		self.Results["Interplate Coefficient Of Variation Z"] = XYZResult[2]
+		
+		
+		
+		#Intra results
 		self.Results["Intraplate Max Distortion"] = []
 		self.Results["Intraplate Max Percentage Distortion"] = []
 		self.Results["Intraplate Coefficient Of Variation"] = []
+		
+		self.Results["Intraplate Max Distortion X"] = []
+		self.Results["Intraplate Max Distortion Y"] = []
+		self.Results["Intraplate Max Distortion Z"] = []
+		
+		self.Results["Intraplate Coefficient Of Variation X"] = []
+		self.Results["Intraplate Coefficient Of Variation Y"] = []
+		self.Results["Intraplate Coefficient Of Variation Z"] = []
+		
 		for plate in self.DistorCalcObj.IntraPlateResults:
-			self.Results["Intraplate Max Distortion"].append(self.GetMaxDistortion(plate))
-			self.Results["Intraplate Max Percentage Distortion"].append(self.GetMaxPercentageDistortion(plate))
-			self.Results["Intraplate Coefficient Of Variation"].append(self.CoefficantOfVariation(plate))
+			self.Results["Intraplate Max Distortion"].append(self.__GetMaxDistortion(plate))
+			self.Results["Intraplate Max Percentage Distortion"].append(self.__GetMaxPercentageDistortion(plate))
+			self.Results["Intraplate Coefficient Of Variation"].append(self.__CoefficantOfVariation(plate))
 			
-		self.MaxDistortionInXYZ(self.DistorCalcObj.InterPlateResults)
+			XYZResult = self.__MaxDistortionInXYZ(plate)
+			self.Results["Intraplate Max Distortion X"].append(XYZResult[0])
+			self.Results["Intraplate Max Distortion Y"].append(XYZResult[1])
+			self.Results["Intraplate Max Distortion Z"].append(XYZResult[2])
+			
+			XYZResult = self.__CoefficantOfVariationXYZ(plate)
+			self.Results["Intraplate Coefficient Of Variation X"].append(XYZResult[0])
+			self.Results["Intraplate Coefficient Of Variation Y"].append(XYZResult[1])
+			self.Results["Intraplate Coefficient Of Variation Z"].append(XYZResult[2])
 		
+
 		
-		#AnalysisResultobjIntra=AnalyseDistances(DistorCalcObj.IntraPlateResults)
+
+		
 		
 	
 		

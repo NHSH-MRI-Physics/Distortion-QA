@@ -17,7 +17,7 @@ ComputeDistortionGeoCorrection.GetDistances()
 
 NoDitsortionAnalysis.DistortionAnalysis()
 NoDitsortionAnalysis.PrintToScreen()
-#NoDitsortionAnalysis.Show3dModel("Intraplate Max Percentage Distortion")
+#NoDitsortionAnalysis.Show3dModel("Interplate Max Distortion X")
 
 
 '''
