@@ -1,0 +1,22 @@
+Study Date: 2021-12-07 19:29:03
+Interplate Stats
+Interplate Max Distortion: 0.4497573311754621 mm
+Interplate Max Percentage Distortion: -0.6767621105907473 %
+Interplate Coefficient Of Variation: -3.1190720756678734
+Interplate Max Distortion X: 6.5978980467792026 mm
+Interplate Max Distortion Y: 6.712044105865761 mm
+Interplate Max Distortion Z: 1.6295677393346892 mm
+Interplate Coefficient Of Variation X: 4.842043942458712
+Interplate Coefficient Of Variation Y: 4.658387699792395
+Interplate Coefficient Of Variation Z: -9.015977956891247
+
+Intraplate StatsIntraplate Max Distortion: 0.19991866360467725 mm
+Intraplate Max Percentage Distortion: 0.4166723761154678
+Intraplate Coefficient Of Variation: 11.148827134376447
+Intraplate Max Distortion X: 5.9703520041268945 mm
+Intraplate Max Distortion Y: 6.041591533105546 mm
+Intraplate Max Distortion Z: 1.7856182802401783 mm
+Intraplate Coefficient Of Variation X: 6.592581410304258
+Intraplate Coefficient Of Variation Y: 5.916658840851347
+Intraplate Coefficient Of Variation Z: 0.667890435496865
+

@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d import proj3d
 from matplotlib.patches import FancyArrowPatch
+import os 
+import csv
+import pandas as pd
 
 class Arrow3D(FancyArrowPatch):
     def __init__(self, xs, ys, zs, *args, **kwargs):
@@ -109,7 +112,7 @@ class AnalysisResults:
 		
 	def __GetStatString(self):
 		output=""
-		
+		output+= ("Study Date: " + str(self.DistorCalcObj.Studydate) + "\n")
 		output+= ("Interplate Stats\n") 
 		output+=("Interplate Max Distortion: " + str(self.Results["Interplate Max Distortion"][0]) +" mm\n")
 		output+=("Interplate Max Percentage Distortion: " + str(self.Results["Interplate Max Percentage Distortion"][0]) +" %\n")
@@ -140,10 +143,52 @@ class AnalysisResults:
 		output+= ("\n")
 		
 		return output
+	
+	def OutputPeriodicData(self, file):
+		Metrics = ["StudyDate"]
+		for key in self.Results.keys():
+			Metrics.append(key)
+			
+		if os.path.isfile(file) == False:
+			f=open(file,'w')
+			string=""
+			for value in Metrics:
+				string+=value+","
+			string=string[:-1]
+			f.write(string+"\n")
+			f.close()
+		string =""
+		for value in Metrics:
+			if value == "StudyDate":
+				string+=str(self.DistorCalcObj.Studydate)+","
+			else:
+				if "Inter" in value:
+					if  ("Coefficient Of Variation" not in value):
+						string+=str(self.Results[value][0])+","
+					else:
+						string+=str(self.Results[value])+","
+				if "Intra" in value:
+					if  ("Coefficient Of Variation" not in value):
+						string+=str(max(x[0] for x in self.Results[value]))+","
+					else:
+						string+=str(max(self.Results[value]))+","
 
+
+		string=string[:-1]
+		string+="\n"
+		with open(file, "a") as fileAppend:
+			fileAppend.write(string)
+
+	def PlotCSV(self,file):
+		data= pd.read_csv(file)
+		print (data)
+		
 	def PrintToScreen(self):
 		print (self.__GetStatString())
 
+	def OutputToFile(self,filename):
+		with open(filename, 'w') as f:
+			f.write(self.__GetStatString())
 	
 	def __GetMaxDistortion(self, ResultsObj):
 		Distortion=[]

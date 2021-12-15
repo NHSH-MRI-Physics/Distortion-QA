@@ -10,6 +10,7 @@ from sklearn.cluster import KMeans
 from dataclasses import dataclass
 import matplotlib
 import copy
+import datetime
 
 #The coordiantes are very confusing...
 #I think
@@ -46,7 +47,7 @@ class DistortionCalculation:
 		self.IntraPlateResults=None
 		self.folder= './'+folder+'/*'
 		self.SequenceName= SequenceName
-		self.StudyTimeDate=None
+		self.Studydate=None
 		
 		
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -647,8 +648,21 @@ class DistortionCalculation:
 			img2d = s.pixel_array
 			img3d[:, :, i] = img2d
 			
-
+		LoadedDICOM = pydicom.dcmread( DICOMFiles[0] )
 		
+		#print (LoadedDICOM)
+		
+		date= (LoadedDICOM["AcquisitionDate"])
+		time= (LoadedDICOM["AcquisitionTime"])
+		
+		year = int(date[0:4])
+		month =  int(date[4:6])
+		day = int(date[6:8])
+		hour = int(time[0:2])
+		Min = int(time[2:4])
+		Sec = int(time[4:6])
+		
+		self.Studydate = datetime.datetime(year, month, day,hour,Min,Sec)		
 	
 		
 		Centre = [img_shape[0]//2,img_shape[1]//2,img_shape[2]//2] 

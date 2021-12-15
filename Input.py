@@ -17,8 +17,13 @@ ComputeDistortionGeoCorrection.GetDistances()
 
 NoDitsortionAnalysis.DistortionAnalysis()
 NoDitsortionAnalysis.PrintToScreen()
+#NoDitsortionAnalysis.OutputToFile("Output.txt")
 #NoDitsortionAnalysis.Show3dModel("Interplate Max Distortion X")
 
+#NoDitsortionAnalysis.OutputPeriodicData("DistortionData.csv")
+#NoDitsortionAnalysis.OutputPeriodicData("DistortionData.csv")
+#NoDitsortionAnalysis.OutputPeriodicData("DistortionData.csv")
+NoDitsortionAnalysis.PlotCSV("DistortionData.csv")
 
 '''
 print (" ")
