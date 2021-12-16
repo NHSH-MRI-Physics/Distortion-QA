@@ -180,8 +180,65 @@ class AnalysisResults:
 			fileAppend.write(string)
 
 	def PlotCSV(self,file):
+		if not os.path.exists('Plots'):
+			os.makedirs('Plots')
+		
 		data= pd.read_csv(file)
-		print (data)
+
+		Metrics =  ["Interplate Max Distortion","Interplate Max Percentage Distortion","Interplate Coefficient Of Variation"]
+		Metrics += ["Intraplate Max Distortion","Intraplate Max Percentage Distortion","Intraplate Coefficient Of Variation"]
+
+		for metric in Metrics:
+			plt.title(metric,fontsize=100)
+			fig = plt.gcf()
+			fig.set_size_inches(60, 30)
+			x, y = zip(*sorted(zip(data["StudyDate"],data[metric])))
+			plt.plot(x,y,linewidth=10,marker="o",markersize=60)
+			plt.xlabel("Date",fontsize=60)
+			plt.ylabel(metric,fontsize=60)
+			plt.xticks(rotation = 45,fontsize=50)
+			plt.yticks(fontsize=50)
+			plt.grid(linewidth = 5)
+			plt.gca().spines['bottom'].set_linewidth(10)
+			plt.gca().spines['left'].set_linewidth(10)
+			plt.gca().spines['top'].set_linewidth(0)
+			plt.gca().spines['right'].set_linewidth(0)
+			plt.tight_layout()
+			plt.savefig("Plots/"+self.CalcName+"_"+metric+".png")
+			plt.close()
+			
+		Metrics = [
+			["Interplate Max Distortion X","Interplate Max Distortion Y","Interplate Max Distortion Z"],
+			["Intraplate Max Distortion X","Intraplate Max Distortion Y","Intraplate Max Distortion Z"],
+			["Interplate Coefficient Of Variation X","Interplate Coefficient Of Variation Y","Interplate Coefficient Of Variation Z"],
+			["Intraplate Coefficient Of Variation X","Intraplate Coefficient Of Variation Y","Intraplate Coefficient Of Variation Z"],
+			]
+		
+		for metric in Metrics:
+			plt.title(metric[0] + metric[1][-1] + metric[2][-1],fontsize=100)
+			fig = plt.gcf()
+			fig.set_size_inches(60, 30)
+			x1, y1 = zip(*sorted(zip(data["StudyDate"],data[metric[0]])))
+			x2, y2 = zip(*sorted(zip(data["StudyDate"],data[metric[1]])))
+			x3, y3 = zip(*sorted(zip(data["StudyDate"],data[metric[2]])))
+			plt.plot(x1,y1, linewidth=10,marker="o",markersize=60,label=metric[0][-1])
+			plt.plot(x2,y2, linewidth=10,marker="o",markersize=60,label=metric[1][-1])
+			plt.plot(x3,y3, linewidth=10,marker="o",markersize=60,label=metric[2][-1])
+			
+			plt.xlabel("Date",fontsize=60)
+			plt.ylabel(metric[0][:-2],fontsize=60)
+			plt.xticks(rotation = 45,fontsize=50)
+			plt.yticks(fontsize=50)
+			plt.grid(linewidth = 5)
+			plt.gca().spines['bottom'].set_linewidth(10)
+			plt.gca().spines['left'].set_linewidth(10)
+			plt.gca().spines['top'].set_linewidth(0)
+			plt.gca().spines['right'].set_linewidth(0)
+			plt.legend(prop={'size': 60})
+			plt.tight_layout()
+			plt.savefig("Plots/"+self.CalcName+"_"+ metric[0] + metric[1][-1] + metric[2][-1] +".png")
+			plt.close()
+		
 		
 	def PrintToScreen(self):
 		print (self.__GetStatString())
