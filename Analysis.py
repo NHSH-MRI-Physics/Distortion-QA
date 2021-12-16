@@ -342,7 +342,6 @@ class AnalysisResults:
 		for result in ResultsObj.DistanceResults:
 			if (result.ExpectedDistance == 40):
 				Distortion.append(result.Distance)
-		print (Distortion)
 		#use the scipy function to get the coefficant of variation
 		return scipy.stats.variation(Distortion)
 	
