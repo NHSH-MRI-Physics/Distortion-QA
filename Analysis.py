@@ -342,7 +342,7 @@ class AnalysisResults:
 		for result in ResultsObj.DistanceResults:
 			if (result.ExpectedDistance == 40):
 				Distortion.append(result.Distance)
-		
+		print (Distortion)
 		#use the scipy function to get the coefficant of variation
 		return scipy.stats.variation(Distortion)
 	
@@ -476,10 +476,12 @@ class AnalysisResults:
 		self.Results["Intraplate Coefficient Of Variation Y"] = []
 		#self.Results["Intraplate Coefficient Of Variation Z"] = []
 		
+		count =0 
 		for plate in self.DistorCalcObj.IntraPlateResults: # we need to go through each plate
 			self.Results["Intraplate Max Distortion"].append(self.__GetMaxDistortion(plate))
 			self.Results["Intraplate Max Percentage Distortion"].append(self.__GetMaxPercentageDistortion(plate))
-			self.Results["Intraplate Coefficient Of Variation"].append(self.__CoefficientOfVariation(plate))
+			if count>0:#Ignore the first plate since it has no 40mm distances...
+				self.Results["Intraplate Coefficient Of Variation"].append(self.__CoefficientOfVariation(plate))
 			
 			XYZResult = self.__MaxDistortionInXYZ(plate)
 			self.Results["Intraplate Max Distortion X"].append(XYZResult[0])
@@ -490,4 +492,5 @@ class AnalysisResults:
 			self.Results["Intraplate Coefficient Of Variation X"].append(XYZResult[0])
 			self.Results["Intraplate Coefficient Of Variation Y"].append(XYZResult[1])
 			#self.Results["Intraplate Coefficient Of Variation Z"].append(XYZResult[2])
+			count+=1
 		
