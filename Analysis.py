@@ -37,7 +37,9 @@ class AnalysisResults:
 		self.ax=None
 		self.fig=None
 		self.curr_pos=0
-		
+	
+	def GetMetrics(self):
+		return list(self.Results.keys())
 		
 	#This is an event function that is called when a keyboard button is pressed after you call the CheckPoints function.
 	def __key_event(self,e):
