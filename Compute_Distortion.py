@@ -300,6 +300,8 @@ class DistortionCalculation:
 			Image = self.GetCorSlice(int(round(SlicePositions[pos]))) #> HighestThresh*0.5
 			fig = plt.gcf()
 			fig.set_size_inches(30, 30)
+			plt.xticks(fontsize=50)
+			plt.yticks(fontsize=50)
 			plt.imshow(Image)
 			plt.close()
 			#plt.show()
@@ -590,6 +592,8 @@ class DistortionCalculation:
 		plt.ioff()
 		Image = self.GetSagSlice(MidWaySlice)
 		fig = plt.figure()
+		plt.xticks(fontsize=50)
+		plt.yticks(fontsize=50)
 		plt.imshow(Image)
 		fig.set_size_inches(30, 30)
 		
