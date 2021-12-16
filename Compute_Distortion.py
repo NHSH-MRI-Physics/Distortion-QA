@@ -18,18 +18,20 @@ import datetime
 #Y = Axial Direction
 #Z = Coronal Direction
 
+
+#This class holds results so we can refer to them later
 @dataclass
 class DistanceResult:
-	Point1: list
-	Point2: list
-	Distance: float
-	ExpectedDistance: float
+	Point1: list #row,col and depth of the point in a grid system
+	Point2: list#row,col and depth of the point  in a grid system
+	Distance: float #measured distance
+	ExpectedDistance: float #Distance we would expect
 	
-	Point1InSpace: list
-	Point2InSpace: list
+	Point1InSpace: list #The acthul coordiantes 
+	Point2InSpace: list #The acthul coordiantes 
 	
 
-
+#a holder class that keeps a list of DistanceResults and the image to plot later
 @dataclass
 class Result:
 	DistanceResults: list
@@ -38,6 +40,7 @@ class Result:
 	
 class DistortionCalculation:
 	
+	#initalises the class with a bunch of variables.
 	def __init__(self, folder, SequenceName):
 		self.img3d = None
 		self.VoxelSize=None
@@ -48,21 +51,21 @@ class DistortionCalculation:
 		self.folder= './'+folder+'/*'
 		self.SequenceName= SequenceName
 		self.Studydate=None
+		self.searchWidth = 4.688
 		
-		
+	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
-		
+		#go through each point
 		for plateIdx in range(len(self.SphereLocations)):
-			
-			for pointIdx in range(len(self.SphereLocations[plateIdx])):
+			for pointIdx in range(len(self.SphereLocations[plateIdx])): #find a point that is with10 of what the user guessed and reset that points position to whatever the user said
 				distance = math.sqrt((PointGuess[0]-self.SphereLocations[plateIdx][pointIdx][0])**2 + (PointGuess[1]-self.SphereLocations[plateIdx][pointIdx][1])**2 +(PointGuess[2]-self.SphereLocations[plateIdx][pointIdx][2])**2 )
 				if distance < 10:
 					self.SphereLocations[plateIdx][pointIdx]=NewPoint
-					return 
-		
-		print ("Warning No Point Found :(")
+					return #if we find the point we are done 
+		raise ValueError("Error No Point Found") #if we donn't find a point throw up an error
 	
-	
+	#These 3 functions extract the slices from the volume
+	#some of the matricies are flipped so they match DICOM viewing software
 	def GetSagSlice(self,SliceNumber):
 		return self.img3d[:,:,SliceNumber]
 	def GetAxialSlice(self,SliceNumber):
@@ -70,10 +73,12 @@ class DistortionCalculation:
 	def GetCorSlice(self,SliceNumber):
 		return np.flip(self.img3d[:,SliceNumber,:], axis=1)
 	
-	
-	def __GetSphereCentres(self, SliceLocCentre,NumberOfSpheresExpected,SearchWidth=4.688):
-		SearchSize = int(round(SearchWidth/self.VoxelSize[1]))
-		#BuildHistogram
+	##A function used to find the spheres, takes in position of slice and how many spheres we expect as well as the search width which the userr can change
+	def __GetSphereCentres(self, SliceLocCentre,NumberOfSpheresExpected):
+		SearchWidth=self.searchWidth
+		SearchSize = int(round(SearchWidth/self.VoxelSize[1])) #get how many slices we are going to search in
+		
+		#go through each slice and binarise it, keep track of the threshold required for each slice and retain the smallest threshold from each slice. 
 		ChosenThresh = sys.maxsize
 		for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 			Image = self.GetCorSlice(i)
@@ -81,12 +86,13 @@ class DistortionCalculation:
 			if (thresh < ChosenThresh):
 				ChosenThresh=thresh
 				
-		#Get list of 3d points for kmeans clustering
+				
+		#Get list of 3d points for kmeans clustering for each sphere, essentially a list of xyz coordaites within each sphere
 		points = []
 		for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 			z=i
 			Image = self.GetCorSlice(i)
-			Binary_Image = Image > ChosenThresh #To high and you miss spheres, to low and you may pick up background noise, maybe this should be the lowest thresh or maybe a list of thresholds for each image?
+			Binary_Image = Image > ChosenThresh 
 			Coords = np.argwhere(Binary_Image != 0)
 			z_coords = np.ones( (Coords.shape[0],1),dtype=int )*z
 			Coords = np.append(Coords,z_coords,axis=1)
@@ -97,10 +103,11 @@ class DistortionCalculation:
 		
 		
 		Spheres = []
-		kmeans = KMeans(n_clusters=NumberOfSpheresExpected, random_state=0).fit(points)
+		kmeans = KMeans(n_clusters=NumberOfSpheresExpected, random_state=0).fit(points)# use this to cluster the points into each sphere
 		
+		
+		#Know we know what sphere belongs to what we work out the centre of mass for each cluster and hence the centre of the sphere
 		for i in range(NumberOfSpheresExpected):
-	
 			idx = np.argwhere(kmeans.labels_==i)[:,0]
 			x_coords = points[idx][:,1] #[1] is x and [0] is y
 			y_coords = points[idx][:,0]
@@ -124,9 +131,9 @@ class DistortionCalculation:
 		
 		
 		#Return all the coords
-		
 		return Spheres
 		
+	#This function finds the distances within a plate.
 	def __ComputerIntraPlateDistances(self, SphereLocations):
 		
 		ResultsForAllPlates=[]
@@ -138,26 +145,30 @@ class DistortionCalculation:
 				average += XYZ[2]
 			SlicePositions.append(average/len(plateXYZ))
 		
+		
 		pos=0
-		for plate in SphereLocations:
+		for plate in SphereLocations: # for each plate..
 			x=[]
 			y=[]
 			z=[]
 			#extract xy
-			for xyz in plate:
+			for xyz in plate: # get all the xyz in a big list
 				x.append([xyz[0]])
 				y.append([xyz[1]])
 				z.append([xyz[2]])
 			
+			#we know the shape of the grid at this point
 			RowsCols=[]
 			if len(plate)==4 or len(plate)==5:
 				RowsCols=[3,3]
 			elif len(plate)==13 or len(plate)==21:
 				RowsCols=[5,5]
 			
+			#cluster each sphere onto a grid using kmeans clustering
 			kmeansCols = KMeans(n_clusters=RowsCols[1], random_state=0).fit(x)
 			kmeansRows = KMeans(n_clusters=RowsCols[0], random_state=0).fit(y)
 			
+			#now we have the grid this part works out where the lines of the grid lay so we can figure out where in the grid a sphere lies
 			colLines = []
 			for i in range(RowsCols[1]):
 				temp = []
@@ -180,22 +191,24 @@ class DistortionCalculation:
 			#Iterate over each col 
 			#then find spheres in the next col and work out distances
 			DistResObjs=[]
-			for col in range(0,RowsCols[1]):
+			for col in range(0,RowsCols[1]): # iterate from left to the right of the image
 	
 				for i in range(len(x)):
 					xyz = [x[i][0],y[i][0],z[i][0]]
-					RowCol = self.__DetermineRowColOfPoint(xyz[1],xyz[0],rowLines,colLines)
+					RowCol = self.__DetermineRowColOfPoint(xyz[1],xyz[0],rowLines,colLines) # get where on the grid this sphere is 
 					targetRowCol = [RowCol[0],RowCol[1]+1]
 	
-					if (RowCol[1]==col): #Get the right col
-						for j in range(len(x)):
+					if (RowCol[1]==col): #make sure we are on the right column 
+						for j in range(len(x)): # go through the other points now
 							xyz_ref = [x[j][0],y[j][0],z[j][0]]
-							RowCol_ref = self.__DetermineRowColOfPoint(xyz_ref[1],xyz_ref[0],rowLines,colLines)
-							if ((RowCol_ref[1] - RowCol[1]) >=0): # find any points in the same col or to the right
+							RowCol_ref = self.__DetermineRowColOfPoint(xyz_ref[1],xyz_ref[0],rowLines,colLines) # find the grid of the new point
+							if ((RowCol_ref[1] - RowCol[1]) >=0): # find any points in the same col or to the right of the current point
 								if (RowCol_ref != RowCol): #Dont calc distances to the same point
+									#work out the distance and expected distance to compare to
 									distance = self.__distanceCalc(xyz,xyz_ref)
 									expecteddistance = math.sqrt( ((RowCol_ref[0]-RowCol[0])*40)**2 + ((RowCol_ref[1]-RowCol[1])*40)**2)
 									
+									#fill up the distance result object and add to our list
 									DistanceResultObj = DistanceResult(copy.deepcopy(RowCol_ref),copy.deepcopy(RowCol),distance,expecteddistance,xyz,xyz_ref)
 									DistResObjs.append(DistanceResultObj)
 		
@@ -292,12 +305,13 @@ class DistortionCalculation:
 											plt.arrow(x=xyz[0], y=xyz[1], dx=xyz_ref[0]-xyz[0], dy=xyz_ref[1]-xyz[1], width=widthArrow,length_includes_head=True) 
 											plt.annotate( str(round(distance,2))+"mm", xy = ( (xyz[0]+xyz_ref[0])/2, (xyz[1]+xyz_ref[1])/2) ,fontsize=fontsize,ha='center',color="orange") 
 											
-			plt.ioff()			
+			plt.ioff()#I think this stopped the plot dialog constnatly showing up...
+			#Draw the girdlines
 			for i in colLines:
 				plt.axvline(x=i)
 			for i in rowLines:
 				plt.axhline(y=i)
-			Image = self.GetCorSlice(int(round(SlicePositions[pos]))) #> HighestThresh*0.5
+			Image = self.GetCorSlice(int(round(SlicePositions[pos]))) #Get the slice to plot
 			fig = plt.gcf()
 			fig.set_size_inches(30, 30)
 			plt.xticks(fontsize=50)
@@ -306,30 +320,28 @@ class DistortionCalculation:
 			plt.close()
 			#plt.show()
 			
+			#return our stuff
 			ResultObj = Result(DistResObjs,fig)
 			ResultsForAllPlates.append(ResultObj)
 			
-			pos+=1
+			pos+=1 # used by thye plotting to determine what slice we are on...
 			
 			
-		#Remove duplicates so check for inverse distances 
+		#Some cases of duplicate distance ie 1->2 and 2->1 so this part removes that 
 		
 		for i in range(0,len(ResultsForAllPlates)):
 			distances = ResultsForAllPlates[i].DistanceResults
 			links=[]
-			
 			for j in range(len(distances)):
 				link = [distances[j].Point1, distances[j].Point2] 
 				link_reverse = link[::-1]
 				
-				if (link in links or link_reverse in links):
+				if (link in links or link_reverse in links): # if a repeat is found nulify it 
 					distances[j]=None
 				else:
-					links.append(link)
+					links.append(link) #fill up this list of links
 			
-			ResultsForAllPlates[i].DistanceResults = [x for x in distances if x is not None]
-	
-		
+			ResultsForAllPlates[i].DistanceResults = [x for x in distances if x is not None] # remove all nulifed entries
 		
 		return ResultsForAllPlates
 	
@@ -369,6 +381,7 @@ class DistortionCalculation:
 		return distances,fig
 		
 	
+	#Helper function that returns sthe grid point, essentially tells you what gridlines the point is closest to. 
 	def __DetermineRowColOfPoint(self, y,x,rowLines,colLines):
 		delta=[]
 		for I in range(0,len(rowLines)):
@@ -381,7 +394,7 @@ class DistortionCalculation:
 		return [row,col]
 	
 
-	
+	#Helpeer function that returns a distance for two points
 	def __distanceCalc(self, xyz1,xyz2):
 		dx = (xyz1[0] - xyz2[0]) * self.VoxelSize[2] #Sag
 		dy = (xyz1[1] - xyz2[1]) * self.VoxelSize[0] #Axial
@@ -500,6 +513,7 @@ class DistortionCalculation:
 		return ResultObj
 			
 	
+	#helper function that returns the row,col and depth of a point by finding what grind line is closest
 	def __DetermineRowColDepthOfPoint(self, x,y,z,depthLines,rowLines,colLines):
 		
 		delta=[]
@@ -529,7 +543,7 @@ class DistortionCalculation:
 			SlicePositions.append(average/len(plateXYZ))
 		
 		
-		MidWaySlice = int(round(self.img_shape[2]/2))
+		MidWaySlice = int(round(self.img_shape[2]/2))# used for plotting
 		x=[]
 		y=[]
 		z=[]
@@ -540,12 +554,12 @@ class DistortionCalculation:
 				y.append([xyz[1]])
 				z.append([xyz[2]])
 			
-		#we know the number and rows and cols in this case 
+		#we clustrer each point into a 3d grid 
 		kmeansCols  = KMeans(n_clusters=5, random_state=0).fit(z)
 		kmeansRows  = KMeans(n_clusters=5, random_state=0).fit(y)
 		kmeansDepth = KMeans(n_clusters=5, random_state=0).fit(x)
 		
-		
+		#Like in the intra case we find the grid lines in all dimeonons, in the intra we only care about one plane but here we care about all axis
 		colLines = []
 		for i in range(5):
 			temp = []
@@ -573,22 +587,26 @@ class DistortionCalculation:
 			depthLines.append(sum(temp)/len(temp))
 		depthLines=sorted(depthLines)
 		
+		
+		
 		distances = []
-		for col in range(0,4):
+		for col in range(0,4): #go through each col
 			for i in range(len(x)):
 				xyz = [x[i][0],y[i][0],z[i][0]]
-				RowColDepth = self.__DetermineRowColDepthOfPoint(xyz[0],xyz[1],xyz[2],depthLines,rowLines,colLines)
+				RowColDepth = self.__DetermineRowColDepthOfPoint(xyz[0],xyz[1],xyz[2],depthLines,rowLines,colLines) #get the grid point
 				if (RowColDepth[1]==col): #Get the right col
 					for j in range(len(x)):
 						xyz_ref = [x[j][0],y[j][0],z[j][0]]
-						RowColDepth_ref = self.__DetermineRowColDepthOfPoint(xyz_ref[0],xyz_ref[1],xyz_ref[2],depthLines,rowLines,colLines)
-						if ( RowColDepth_ref[1] > RowColDepth[1]): 
+						RowColDepth_ref = self.__DetermineRowColDepthOfPoint(xyz_ref[0],xyz_ref[1],xyz_ref[2],depthLines,rowLines,colLines) #ge the ref point
+						if ( RowColDepth_ref[1] > RowColDepth[1]): #only accept points taht are to the right (ignore points in the same plate)
+								#get the distances and store them
 								distance = self.__distanceCalc(xyz,xyz_ref)
 								expecteddistance = math.sqrt( ((RowColDepth_ref[0]-RowColDepth[0])*40)**2 + ((RowColDepth_ref[1]-RowColDepth[1])*40)**2 + ((RowColDepth_ref[2]-RowColDepth[2])*40)**2 )
 								
 								DistanceResultObj = DistanceResult(copy.deepcopy(RowColDepth_ref),copy.deepcopy(RowColDepth),distance,expecteddistance,xyz,xyz_ref)
 								distances.append(DistanceResultObj)
-
+								
+		#plot in the mid slice for visualisation
 		plt.ioff()
 		Image = self.GetSagSlice(MidWaySlice)
 		fig = plt.figure()
@@ -600,8 +618,8 @@ class DistortionCalculation:
 		for i in SlicePositions:
 			plt.axvline(x=i)
 		
-
-		y=self.img_shape[0]*0.6
+	
+		#get the average interplate distance for the plot
 		ArrowAverages = []
 		for col in range(0,4):
 			average = []
@@ -613,37 +631,33 @@ class DistortionCalculation:
 							if ( (distances[i].Point1[1]-distances[i].Point2[1]) == 1): 
 								average.append(distances[i].Distance)
 			ArrowAverages.append( (sum(average)/len(average)) )
-						
 		
+		#draw the arrows on the plot
+		y=self.img_shape[0]*0.6
 		for i in range(0,len(SlicePositions)-1):
 			plt.arrow(x=SlicePositions[i], y=y, dx=SlicePositions[i+1]-SlicePositions[i], dy=0, width=5,length_includes_head=True) 
 			plt.annotate( str(round(ArrowAverages[i],2))+"mm", xy = ( (SlicePositions[i]+SlicePositions[i+1])/2, y-10),fontsize=50,ha='center',color="orange") 
 			y-=30
 		
 		plt.close(fig)
-
 		ResultObj = Result(distances,fig)
-		
 		return ResultObj
 		
-		
+	#the user calls this to get the sphere locations
 	def GetFudicalSpheres(self):
-		#CleanData
+		#get all the DICOM files
 		DICOMFiles = glob.glob(self.folder)
 		ExtractedSequence = self.SequenceName
 		
-		#Load in all DICOM slices
-		MaxValue = 0
+		#Load in all DICOM files and make sure its the right sequence 
 		DICOMS=[]
 		for file in DICOMFiles:
 			LoadedDICOM = pydicom.read_file( file )
 			if (LoadedDICOM.SeriesDescription == ExtractedSequence):
 				DICOMS.append(LoadedDICOM)
-				if ( np.max(DICOMS[-1].pixel_array) > MaxValue):
-					MaxValue = np.max(DICOMS[-1].pixel_array)
-		DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False)
+		DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False) # sort them by slice 
 	
-		#Put it into a 3d array for slicing
+		#Put it into a 3d array for slicing and get some settings
 		img_shape = list(DICOMS[0].pixel_array.shape) #Axial, Cor, Sag (i think)
 		VoxelSize = [DICOMS[0].PixelSpacing[0],DICOMS[0].PixelSpacing[1],DICOMS[0].SpacingBetweenSlices] #Axial, Cor, Sag (i think)
 		img_shape.append(len(DICOMS))
@@ -652,23 +666,19 @@ class DistortionCalculation:
 			img2d = s.pixel_array
 			img3d[:, :, i] = img2d
 			
+		#Get the datetime of the study
 		LoadedDICOM = pydicom.dcmread( DICOMFiles[0] )
-		
-		#print (LoadedDICOM)
-		
 		date= (LoadedDICOM["AcquisitionDate"])
 		time= (LoadedDICOM["AcquisitionTime"])
-		
 		year = int(date[0:4])
 		month =  int(date[4:6])
 		day = int(date[6:8])
 		hour = int(time[0:2])
 		Min = int(time[2:4])
 		Sec = int(time[4:6])
-		
 		self.Studydate = datetime.datetime(year, month, day,hour,Min,Sec)		
 	
-		
+		#get the centre with a guess of where each plate is
 		Centre = [img_shape[0]//2,img_shape[1]//2,img_shape[2]//2] 
 		Plates =  [ int(round(Centre[1]-(40/VoxelSize[1])*2)),
 					int(round(Centre[1]-(40/VoxelSize[1]))),
@@ -676,36 +686,37 @@ class DistortionCalculation:
 					int(round(Centre[1]+(40/VoxelSize[1]))),
 					int(round(Centre[1]+(40/VoxelSize[1])*2))]
 		
+		#set some class varaibles so we can access them elsewhere
 		self.img3d = img3d
 		self.img_shape = img_shape
 		self.VoxelSize = VoxelSize
 		
+		#We know the spheres in each plate 
 		SpheresPerPlate = [4,13,21,13,5]
 		SphereLocations = [] #plate 1 to 5 in order
-		for plate in range(5):
+		for plate in range(5): # go through each plae and get the sphere locations
 			Spheres= self.__GetSphereCentres(Plates[plate],SpheresPerPlate[plate])
-			SphereLocations.append(Spheres)
+			SphereLocations.append(Spheres)#the xyz of each sphere is in terms of slice and coordiants (not real distances, although all distances are covered to mm)
 	
 		self.SphereLocations = SphereLocations
 
-
+	#User calls this to get the distances computes
 	def GetDistances(self):
-		InterPlateResults = self.__ComputerInterPlateDistancesV3(self.SphereLocations) 
+		InterPlateResults = self.__ComputerInterPlateDistancesV3(self.SphereLocations) #Get inter distances
 		plt.close()
 		
-		IntraPlateResults = self.__ComputerIntraPlateDistances(self.SphereLocations) 
-			
-		
-		
+		IntraPlateResults = self.__ComputerIntraPlateDistances(self.SphereLocations)  #Get intra distances
+
+
 		#Adjust point1 and point 2 so its [Sag,Ax,Cor], means the xyz coords and the point index match up..
-		#Do interplate first convert from [Axial,Cor,Sag] -> [Sag,Ax,Cor]
 		for i in range(len(InterPlateResults.DistanceResults)):
 			temp = InterPlateResults.DistanceResults[i].Point1
 			InterPlateResults.DistanceResults[i].Point1=[temp[2],temp[0],temp[1]]
 			
 			temp = InterPlateResults.DistanceResults[i].Point2
 			InterPlateResults.DistanceResults[i].Point2=[temp[2],temp[0],temp[1]]
-			
+		
+		#do the same for intra
 		for j in range(len(IntraPlateResults)):
 			for i in range(len(IntraPlateResults[j].DistanceResults)):
 				IntraPlateResults[j].DistanceResults[i].Point1.append(j)
@@ -720,7 +731,4 @@ class DistortionCalculation:
 		
 		self.InterPlateResults = InterPlateResults
 		self.IntraPlateResults = IntraPlateResults
-		
-		
-		
 
