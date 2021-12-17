@@ -82,9 +82,13 @@ class AnalysisResults:
 		ax = fig.gca(projection='3d')
 		ax.set_aspect("auto")
 		
-		ax.set_zlabel('Coronal', fontsize=20)
-		ax.set_ylabel('Axial', fontsize=20)
-		ax.set_xlabel('Sagittal', fontsize=20)
+		#ax.set_zlabel('Coronal', fontsize=20)
+		#ax.set_ylabel('Axial', fontsize=20)
+		#ax.set_xlabel('Sagittal', fontsize=20)
+		ax.set_zlabel('z', fontsize=20)
+		ax.set_ylabel('y', fontsize=20)
+		ax.set_xlabel('x', fontsize=20)
+		
 		
 	
 		colours = ["r","g","b","m","y"] # List of colours so each plate gets coloured differently
