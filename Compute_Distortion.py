@@ -5,13 +5,14 @@ import numpy as np
 from skimage.feature import blob_dog, blob_log, blob_doh
 import math
 from skimage.filters import threshold_minimum
+import skimage.filters 
 import sys
 from sklearn.cluster import KMeans
 from dataclasses import dataclass
 import matplotlib
 import copy
 import datetime
-
+from scipy import ndimage
 #The coordiantes are very confusing...
 #I think
 #X = Sag direction
@@ -53,6 +54,11 @@ class DistortionCalculation:
 		self.Studydate=None
 		self.searchWidth = 4.688
 		
+		self.BinariseMethod = "Min"
+		self.Threshold=3000
+		self.ratio=0.3
+		self.checkBinaryImages=False
+		
 	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
 		#go through each point
@@ -80,27 +86,70 @@ class DistortionCalculation:
 		
 		#go through each slice and binarise it, keep track of the threshold required for each slice and retain the smallest threshold from each slice. 
 		ChosenThresh = sys.maxsize
+		ThreshForIslands=[]
 		for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 			Image = self.GetCorSlice(i)
-			thresh = threshold_minimum(Image)
-			if (thresh < ChosenThresh):
-				ChosenThresh=thresh
-				
+			#plt.imshow(Image)
+			#plt.show()
+			
+			if (self.BinariseMethod=="Min"):#This method computes the threshold based on the Min histogram method (see scipy)
+				thresh = skimage.filters.threshold_minimum(Image)
+				if (thresh < ChosenThresh):
+					ChosenThresh=thresh
+			elif (self.BinariseMethod=="Constant"): #This ithe suer set threshold
+				thresh = self.Threshold
+				if (thresh < ChosenThresh):
+					ChosenThresh=thresh
+			elif (self.BinariseMethod=="RatioOfMax"): #This allows a ratio of the max for each image to be set
+				thresh = self.ratio*np.max(Image)
+				if (thresh < ChosenThresh):
+					ChosenThresh=thresh
+			elif (self.BinariseMethod=="IslandChecker"):#This method checks the nuymber of objects in the iamge and if it is expected then accept that threshold.
+
+				results = []
+				for TestThresh in range(0,int(np.max(Image)),10):
+					BinaryImage = Image > TestThresh #Get the binary image
+					label, Number = ndimage.label(BinaryImage) #find the objects 
+					if (Number == NumberOfSpheresExpected): #is it the right number?
+						results.append([label,TestThresh]) #Add that to the list
+				if (len(results)>0):
+					ThreshForIslands.append(0)
+					#Out of the thresholds that we accepted onluy keep the one with the largest spheres.
+					for result in results:
+						sizes = np.bincount(result[0].ravel())
+						average=np.average(sizes[1:])
+						if (average>ThreshForIslands[-1]):
+							ThreshForIslands[-1]=result[1]
+				else:
+					ThreshForIslands.append(sys.maxsize) #essentially ignore this silice... this only happens if we have not the correct number of spheres on it...
+			else:
+				raise ValueError('Binarise method not found')
+			
 				
 		#Get list of 3d points for kmeans clustering for each sphere, essentially a list of xyz coordaites within each sphere
 		points = []
+		count=0
 		for i in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
 			z=i
 			Image = self.GetCorSlice(i)
-			Binary_Image = Image > ChosenThresh 
+			
+			if (self.BinariseMethod!="IslandChecker"):
+				Binary_Image = Image > ChosenThresh 
+			else: 
+				Binary_Image = Image > ThreshForIslands[count]
+			
+			if (self.checkBinaryImages==True):
+				plt.imshow(Binary_Image)
+				plt.show()
 			Coords = np.argwhere(Binary_Image != 0)
 			z_coords = np.ones( (Coords.shape[0],1),dtype=int )*z
 			Coords = np.append(Coords,z_coords,axis=1)
 			for xyz in Coords:
 				points.append(xyz)
+			count+=1
 		points=np.array(points)
 		
-		
+		#sys.exit()
 		
 		Spheres = []
 		kmeans = KMeans(n_clusters=NumberOfSpheresExpected, random_state=0).fit(points)# use this to cluster the points into each sphere
@@ -656,6 +705,7 @@ class DistortionCalculation:
 			if (LoadedDICOM.SeriesDescription == ExtractedSequence):
 				DICOMS.append(LoadedDICOM)
 		DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False) # sort them by slice 
+	
 	
 		#Put it into a 3d array for slicing and get some settings
 		img_shape = list(DICOMS[0].pixel_array.shape) #Axial, Cor, Sag (i think)
