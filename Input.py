@@ -8,16 +8,16 @@ import sys
 ComputeDistortion = Compute_Distortion.DistortionCalculation("Flipped" , "3D Sag T1 BRAVO_90-y-rot") 
 
 #The isaldnChecker method is a bit more sensitive to background noise so its usually good to shortern the search width
-ComputeDistortion.searchWidth = 3.9
+#ComputeDistortion.searchWidth = 3.9
 
 #This function lets you check each binary image but its alot of images...
 #ComputeDistortion.checkBinaryImages=True
 
 #Set the method to binarise
-ComputeDistortion.BinariseMethod = "IslandChecker"
+ComputeDistortion.BinariseMethod = "Constant"
 #Set up the analysis script, this takes the computed distacnes and output metrics. Pass a tag for the calculaton (used for naming saved images etc) and the previously constructed distirtion calc class
 Analyse = Analysis.AnalysisResults("FlippedData",ComputeDistortion)
-
+ComputeDistortion.Threshold=2000
 #Call this function to get all the centre of the distances
 ComputeDistortion.GetFudicalSpheres()
 
