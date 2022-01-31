@@ -748,6 +748,21 @@ class DistortionCalculation:
 			Spheres= self.__GetSphereCentres(Plates[plate],SpheresPerPlate[plate])
 			SphereLocations.append(Spheres)#the xyz of each sphere is in terms of slice and coordiants (not real distances, although all distances are covered to mm)
 	
+		for i in range(5):
+			for j in range(len(SphereLocations[i])):
+				refpoint = SphereLocations[i][j]
+
+				for I in range(5):
+					for J in range(len(SphereLocations[I])):
+						if (I!=i and J!=j):
+							CheckPoint = SphereLocations[I][J]
+							dist = (refpoint[0]-CheckPoint[0])**2 + (refpoint[1]-CheckPoint[1])**2 + (refpoint[2]-CheckPoint[2])**2
+							if (dist <= 100):
+								print ()
+								raise ValueError("Error! two points found within 10mm of each other!") 
+								
+		
+
 		self.SphereLocations = SphereLocations
 
 	#User calls this to get the distances computes

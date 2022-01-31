@@ -113,9 +113,11 @@ class AnalysisResults:
 			if "Inter" in metric:#Just a work around since the intra stuff is in a list already, makes it easy to have it one think if we can just put the inter results in a list as well.
 				result=[result]
 				
-				
+
 			count =0
 			for dist in result: #Go through each point and convert from xyz coords to real distances
+				print (dist[0],dist[1].Point1,dist[1].Point2)
+				
 				#dist[1] is a distance result object which contains several properties about the distance being used here (like connecting points)
 				Point1 = dist[1].Point1InSpace
 				Point2 = dist[1].Point2InSpace
