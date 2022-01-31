@@ -148,26 +148,26 @@ class AnalysisResults:
 		output+=("Interplate Max Percentage Distortion: " + str(self.Results["Interplate Max Percentage Distortion"][0]) +" %\n")
 		output+=("Interplate Coefficient Of Variation: " + str(self.Results["Interplate Coefficient Of Variation"])+"\n")
 		
-		output+=("Interplate Max Distortion X: " + str(self.Results["Interplate Max Distortion X"][0]) +" mm\n")
-		output+=("Interplate Max Distortion Y: " + str(self.Results["Interplate Max Distortion Y"][0]) +" mm\n")
-		output+=("Interplate Max Distortion Z: " + str(self.Results["Interplate Max Distortion Z"][0]) +" mm\n")
+		#output+=("Interplate Max Distortion X: " + str(self.Results["Interplate Max Distortion X"][0]) +" mm\n")
+		#output+=("Interplate Max Distortion Y: " + str(self.Results["Interplate Max Distortion Y"][0]) +" mm\n")
+		#output+=("Interplate Max Distortion Z: " + str(self.Results["Interplate Max Distortion Z"][0]) +" mm\n")
 		
-		output+=("Interplate Coefficient Of Variation X: " + str(self.Results["Interplate Coefficient Of Variation X"])+"\n")
-		output+=("Interplate Coefficient Of Variation Y: " + str(self.Results["Interplate Coefficient Of Variation Y"])+"\n")
-		output+=("Interplate Coefficient Of Variation Z: " + str(self.Results["Interplate Coefficient Of Variation Z"])+"\n")
+		#output+=("Interplate Coefficient Of Variation X: " + str(self.Results["Interplate Coefficient Of Variation X"])+"\n")
+		#output+=("Interplate Coefficient Of Variation Y: " + str(self.Results["Interplate Coefficient Of Variation Y"])+"\n")
+		#output+=("Interplate Coefficient Of Variation Z: " + str(self.Results["Interplate Coefficient Of Variation Z"])+"\n")
 		
-		output+= ("\n")
-		output+= ("Intraplate Stats\n")
-		output+=("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm\n") #This one is a bit different since its a list of list this is a way to get the max value in a list of lists 
-		output+=("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +"\n" )
-		output+=("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"]))+"\n")
+		#output+= ("\n")
+		#output+= ("Intraplate Stats\n")
+		#output+=("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm\n") #This one is a bit different since its a list of list this is a way to get the max value in a list of lists 
+		#output+=("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +"\n" )
+		#output+=("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"]))+"\n")
 		
-		output+=("Intraplate Max Distortion X: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion X"])) +" mm\n")
-		output+=("Intraplate Max Distortion Y: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Y"])) +" mm\n")
-		output+=("Intraplate Max Distortion Z: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Z"])) +" mm\n")
+		#output+=("Intraplate Max Distortion X: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion X"])) +" mm\n")
+		#output+=("Intraplate Max Distortion Y: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Y"])) +" mm\n")
+		#output+=("Intraplate Max Distortion Z: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Z"])) +" mm\n")
 		
-		output+=("Intraplate Coefficient Of Variation X: " + str(max(self.Results["Intraplate Coefficient Of Variation X"]))+"\n")
-		output+=("Intraplate Coefficient Of Variation Y: " + str(max(self.Results["Intraplate Coefficient Of Variation Y"]))+"\n")
+		#output+=("Intraplate Coefficient Of Variation X: " + str(max(self.Results["Intraplate Coefficient Of Variation X"]))+"\n")
+		#output+=("Intraplate Coefficient Of Variation Y: " + str(max(self.Results["Intraplate Coefficient Of Variation Y"]))+"\n")
 		#output+=("Intraplate Coefficient Of Variation Z: " + str(max(self.Results["Intraplate Coefficient Of Variation Z"]))+"\n")
 		
 		output+= ("\n")
@@ -209,6 +209,7 @@ class AnalysisResults:
 						string+=str(self.Results[value])+","
 				if "Intra" in value:
 					if  ("Coefficient Of Variation" not in value):
+						print (value)
 						string+=str(max(x[0] for x in self.Results[value]))+","
 					else:
 						string+=str(max(self.Results[value]))+","
@@ -254,7 +255,7 @@ class AnalysisResults:
 			plt.savefig("Plots/"+self.CalcName+"_"+metric+".png")
 			plt.close()
 			
-			
+		'''
 		#Do the same thing again except in this case we want X,Y and Z on the same plot
 		Metrics = [
 			["Interplate Max Distortion X","Interplate Max Distortion Y","Interplate Max Distortion Z"],
@@ -313,6 +314,7 @@ class AnalysisResults:
 			plt.tight_layout()
 			plt.savefig("Plots/"+self.CalcName+"_"+ metric[0] + metric[1][-1]+".png")
 			plt.close()
+			'''
 		
 	#Simply print the string to screen for all the metrics
 	def PrintToScreen(self):
@@ -461,6 +463,7 @@ class AnalysisResults:
 		self.Results["Interplate Max Percentage Distortion"] = self.__GetMaxPercentageDistortion(self.DistorCalcObj.InterPlateResults)
 		self.Results["Interplate Coefficient Of Variation"] = self.__CoefficientOfVariation(self.DistorCalcObj.InterPlateResults)
 		
+		'''
 		XYZResult = self.__MaxDistortionInXYZ(self.DistorCalcObj.InterPlateResults) #Remember this returns a list of for x y and z 
 		self.Results["Interplate Max Distortion X"] = XYZResult[0]
 		self.Results["Interplate Max Distortion Y"] = XYZResult[1]
@@ -470,7 +473,7 @@ class AnalysisResults:
 		self.Results["Interplate Coefficient Of Variation X"] = XYZResult[0]
 		self.Results["Interplate Coefficient Of Variation Y"] = XYZResult[1]
 		self.Results["Interplate Coefficient Of Variation Z"] = XYZResult[2]
-		
+		'''
 		
 		
 		#Inter results, compute the metric and put it in the dictonary
@@ -478,6 +481,7 @@ class AnalysisResults:
 		self.Results["Intraplate Max Percentage Distortion"] = []
 		self.Results["Intraplate Coefficient Of Variation"] = []
 		
+		'''
 		self.Results["Intraplate Max Distortion X"] = []
 		self.Results["Intraplate Max Distortion Y"] = []
 		self.Results["Intraplate Max Distortion Z"] = []
@@ -485,7 +489,8 @@ class AnalysisResults:
 		self.Results["Intraplate Coefficient Of Variation X"] = []
 		self.Results["Intraplate Coefficient Of Variation Y"] = []
 		#self.Results["Intraplate Coefficient Of Variation Z"] = []
-		
+		'''
+
 		count =0 
 		for plate in self.DistorCalcObj.IntraPlateResults: # we need to go through each plate
 			self.Results["Intraplate Max Distortion"].append(self.__GetMaxDistortion(plate))
@@ -493,14 +498,14 @@ class AnalysisResults:
 			if count>0:#Ignore the first plate since it has no 40mm distances...
 				self.Results["Intraplate Coefficient Of Variation"].append(self.__CoefficientOfVariation(plate))
 			
-			XYZResult = self.__MaxDistortionInXYZ(plate)
-			self.Results["Intraplate Max Distortion X"].append(XYZResult[0])
-			self.Results["Intraplate Max Distortion Y"].append(XYZResult[1])
-			self.Results["Intraplate Max Distortion Z"].append(XYZResult[2])
+			#XYZResult = self.__MaxDistortionInXYZ(plate)
+			#self.Results["Intraplate Max Distortion X"].append(XYZResult[0])
+			#self.Results["Intraplate Max Distortion Y"].append(XYZResult[1])
+			#self.Results["Intraplate Max Distortion Z"].append(XYZResult[2])
 			
-			XYZResult = self.__CoefficientOfVariationXYZ(plate,True)
-			self.Results["Intraplate Coefficient Of Variation X"].append(XYZResult[0])
-			self.Results["Intraplate Coefficient Of Variation Y"].append(XYZResult[1])
+			#XYZResult = self.__CoefficientOfVariationXYZ(plate,True)
+			#self.Results["Intraplate Coefficient Of Variation X"].append(XYZResult[0])
+			#self.Results["Intraplate Coefficient Of Variation Y"].append(XYZResult[1])
 			#self.Results["Intraplate Coefficient Of Variation Z"].append(XYZResult[2])
 			count+=1
 		

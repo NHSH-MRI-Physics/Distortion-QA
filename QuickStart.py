@@ -13,7 +13,6 @@ NoDistortionAnalysis = Analysis.AnalysisResults("No_Distortion",ComputeDistortio
 #Call this function to get all the centre of the distances
 ComputeDistortionGeoCorrection.GetFudicalSpheres()
 
-
 #Call this function to calculate the distances
 ComputeDistortionGeoCorrection.GetDistances()
 

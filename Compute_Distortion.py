@@ -796,4 +796,3 @@ class DistortionCalculation:
 		
 		self.InterPlateResults = InterPlateResults
 		self.IntraPlateResults = IntraPlateResults
-

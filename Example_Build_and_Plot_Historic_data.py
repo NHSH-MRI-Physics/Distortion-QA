@@ -85,4 +85,4 @@ DistortionAnalysis.OutputPeriodicData("DistortionData.csv")
 
 
 #Plot the csv so we can see data over time, check the Plot folder
-NoDitsortionAnalysis.PlotCSV("DistortionData.csv")
+NoDistortionAnalysis.PlotCSV("DistortionData.csv")
