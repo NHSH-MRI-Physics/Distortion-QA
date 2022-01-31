@@ -155,7 +155,7 @@ class AnalysisResults:
 		output+=("Interplate Coefficient Of Variation Z: " + str(self.Results["Interplate Coefficient Of Variation Z"])+"\n")
 		
 		output+= ("\n")
-		output+= ("Intraplate Stats")
+		output+= ("Intraplate Stats\n")
 		output+=("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm\n") #This one is a bit different since its a list of list this is a way to get the max value in a list of lists 
 		output+=("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +"\n" )
 		output+=("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"]))+"\n")
@@ -360,6 +360,7 @@ class AnalysisResults:
 		dz=[] #Cor
 		
 		for result in ResultsObj.DistanceResults:
+			
 			#Based on the location of the two points (in terms of row col and depth) find the difference, ie how far away they are
 			DeltaX=np.abs(result.Point1[0]-result.Point2[0])
 			DeltaY=np.abs(result.Point1[1]-result.Point2[1])
@@ -383,6 +384,8 @@ class AnalysisResults:
 		#return a list where each element coresponds to x, y and z.
 		result = [ [max(dx),ResultsObj.DistanceResults[idxX]] , [max(dy),ResultsObj.DistanceResults[idxY]] , [max(dz),ResultsObj.DistanceResults[idxZ] ] ]
 		
+
+
 		return result
 	
 	#Unused, it didnt make much sense since many of the distances are 0
