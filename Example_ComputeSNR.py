@@ -11,4 +11,5 @@ Analyse = Analysis.AnalysisResults("FlippedData",ComputeDistortion)
 ComputeDistortion.Threshold=3000
 ComputeDistortion.GetFudicalSpheres()
 SNR = SNRCalc.SNR(ComputeDistortion)
-SNR.ComputerSNR()
+SNR.boxsize=[50,50]
+SNR.ComputerSNR(showRegions=True)

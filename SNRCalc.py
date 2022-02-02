@@ -21,14 +21,15 @@ class SNR():
 	#initalises the class with a bunch of variables.
 	def __init__(self, DistortionObj):
 		self.DistortionObj = DistortionObj
+		self.boxsize = [50,50]
 
-	def ComputerSNR(self):
+	def ComputerSNR(self,showRegions=False):
 		Spheres = self.DistortionObj.SphereLocations[0] #get spheres in the top slice 
 		averagex = []
 		averagey = []
 		averagez = []
 
-		boxsize = [50,50]
+		boxsize = self.boxsize 
 
 		for xyz in Spheres:
 			averagex.append(xyz[0])
@@ -53,23 +54,21 @@ class SNR():
 		#Image[int(0):int(boxsize[1]),int(Image.shape[1]-1-boxsize[1]):int(Image.shape[1]-1)] = 7000000
 		#Image[int(Image.shape[0]-1-boxsize[0]):int(Image.shape[0]-1),int(Image.shape[1]-1-boxsize[1]):int(Image.shape[1]-1)] = 7000000
 
-		'''
-		SigRect = patches.Rectangle((averagex-boxsize[0]/2, averagey-boxsize[1]/2), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-		Noise1Rect = patches.Rectangle((0, 0), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-		Noise2Rect = patches.Rectangle((Image.shape[1]-1-boxsize[0], 0), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-		Noise3Rect = patches.Rectangle((0,Image.shape[0]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-		Noise4Rect = patches.Rectangle((Image.shape[1]-1-boxsize[0], Image.shape[0]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-						
-		plt.gca().add_patch(SigRect)
-		plt.gca().add_patch(Noise1Rect)
-		plt.gca().add_patch(Noise2Rect)
-		plt.gca().add_patch(Noise3Rect)
-		plt.gca().add_patch(Noise4Rect)
+		if (showRegions):
+			SigRect = patches.Rectangle((averagex-boxsize[0]/2, averagey-boxsize[1]/2), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+			Noise1Rect = patches.Rectangle((0, 0), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+			Noise2Rect = patches.Rectangle((Image.shape[1]-1-boxsize[0], 0), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+			Noise3Rect = patches.Rectangle((0,Image.shape[0]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+			Noise4Rect = patches.Rectangle((Image.shape[1]-1-boxsize[0], Image.shape[0]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+							
+			plt.gca().add_patch(SigRect)
+			plt.gca().add_patch(Noise1Rect)
+			plt.gca().add_patch(Noise2Rect)
+			plt.gca().add_patch(Noise3Rect)
+			plt.gca().add_patch(Noise4Rect)
 
-		plt.imshow(Image)
-		plt.show()
-		sys.exit()
-		'''
+			plt.imshow(Image)
+			plt.show()
 
 		N = (np.std(Noise1.flatten()) + np.std(Noise2.flatten()) + np.std(Noise3.flatten()) + np.std(Noise4.flatten()))/4.0 
 		S = np.mean(Signal)
