@@ -53,19 +53,25 @@ class SNR():
 		#Image[int(0):int(boxsize[1]),int(Image.shape[1]-1-boxsize[1]):int(Image.shape[1]-1)] = 7000000
 		#Image[int(Image.shape[0]-1-boxsize[0]):int(Image.shape[0]-1),int(Image.shape[1]-1-boxsize[1]):int(Image.shape[1]-1)] = 7000000
 
-
+		'''
 		SigRect = patches.Rectangle((averagex-boxsize[0]/2, averagey-boxsize[1]/2), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
 		Noise1Rect = patches.Rectangle((0, 0), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
 		Noise2Rect = patches.Rectangle((Image.shape[1]-1-boxsize[0], 0), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-		#Noise3Rect = patches.Rectangle((0, Image.shape[1]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
-		#Noise4Rect = patches.Rectangle((Image.shape[0]-1-boxsize[0], Image.shape[1]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+		Noise3Rect = patches.Rectangle((0,Image.shape[0]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
+		Noise4Rect = patches.Rectangle((Image.shape[1]-1-boxsize[0], Image.shape[0]-1-boxsize[1]), boxsize[0], boxsize[1], linewidth=1, edgecolor='r', facecolor='none')
 						
 		plt.gca().add_patch(SigRect)
 		plt.gca().add_patch(Noise1Rect)
 		plt.gca().add_patch(Noise2Rect)
-		#plt.gca().add_patch(Noise3Rect)
-		#plt.gca().add_patch(Noise4Rect)
+		plt.gca().add_patch(Noise3Rect)
+		plt.gca().add_patch(Noise4Rect)
 
 		plt.imshow(Image)
 		plt.show()
 		sys.exit()
+		'''
+
+		N = (np.std(Noise1.flatten()) + np.std(Noise2.flatten()) + np.std(Noise3.flatten()) + np.std(Noise4.flatten()))/4.0 
+		S = np.mean(Signal)
+		SNR = S/N*0.66
+		print ("SNR: " + str(SNR))
