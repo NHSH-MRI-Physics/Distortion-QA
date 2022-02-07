@@ -157,10 +157,10 @@ class AnalysisResults:
 		#output+=("Interplate Coefficient Of Variation Z: " + str(self.Results["Interplate Coefficient Of Variation Z"])+"\n")
 		
 		#output+= ("\n")
-		#output+= ("Intraplate Stats\n")
-		#output+=("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm\n") #This one is a bit different since its a list of list this is a way to get the max value in a list of lists 
-		#output+=("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +"\n" )
-		#output+=("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"]))+"\n")
+		output+= ("Intraplate Stats\n")
+		output+=("Intraplate Max Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion"])) +" mm\n") #This one is a bit different since its a list of list this is a way to get the max value in a list of lists 
+		output+=("Intraplate Max Percentage Distortion: " + str(max(x[0] for x in self.Results["Intraplate Max Percentage Distortion"])) +"\n" )
+		output+=("Intraplate Coefficient Of Variation: " + str(max(self.Results["Intraplate Coefficient Of Variation"]))+"\n")
 		
 		#output+=("Intraplate Max Distortion X: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion X"])) +" mm\n")
 		#output+=("Intraplate Max Distortion Y: " + str(max(x[0] for x in self.Results["Intraplate Max Distortion Y"])) +" mm\n")
