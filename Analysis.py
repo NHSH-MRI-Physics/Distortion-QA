@@ -138,7 +138,7 @@ class AnalysisResults:
 		
 		plt.show()
 		
-		
+
 	#This function just produces a string for all metrics for each displaying
 	def __GetStatString(self):
 		output=""

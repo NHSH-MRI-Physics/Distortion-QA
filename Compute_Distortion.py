@@ -163,6 +163,7 @@ class DistortionCalculation:
 			z_coords = points[idx][:,2]
 			CentreOfSphere = [sum(x_coords) / len(points[idx]),sum(y_coords) / len(points[idx]),sum(z_coords) / len(points[idx])]
 			Spheres.append(CentreOfSphere)
+
 			#print (CentreOfSphere)
 		
 		'''
