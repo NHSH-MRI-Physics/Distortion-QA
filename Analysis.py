@@ -169,6 +169,9 @@ class AnalysisResults:
 		#output+=("Intraplate Coefficient Of Variation X: " + str(max(self.Results["Intraplate Coefficient Of Variation X"]))+"\n")
 		#output+=("Intraplate Coefficient Of Variation Y: " + str(max(self.Results["Intraplate Coefficient Of Variation Y"]))+"\n")
 		#output+=("Intraplate Coefficient Of Variation Z: " + str(max(self.Results["Intraplate Coefficient Of Variation Z"]))+"\n")
+
+		if (self.DistorCalcObj.BinaryWarning==True):
+			output+=("Warning! Large Radius or close sphere found,check the binary images!\n")
 		
 		output+= ("\n")
 		

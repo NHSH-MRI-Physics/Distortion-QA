@@ -13,6 +13,7 @@ import matplotlib
 import copy
 import datetime
 from scipy import ndimage
+import os
 #The coordiantes are very confusing...
 #I think
 #X = Sag direction
@@ -58,6 +59,10 @@ class DistortionCalculation:
 		self.Threshold=3000
 		self.ratio=0.3
 		self.checkBinaryImages=False
+
+		self.radiiWarning=15
+		self.CloseSphereDist=20
+		self.BinaryWarning=False
 		
 	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -140,7 +145,8 @@ class DistortionCalculation:
 			
 			if (self.checkBinaryImages==True):
 				plt.imshow(Binary_Image)
-				plt.show()
+				plt.savefig(os.path.join("BinaryImages",str(i)+".png"))
+				#plt.show()
 			Coords = np.argwhere(Binary_Image != 0)
 			z_coords = np.ones( (Coords.shape[0],1),dtype=int )*z
 			Coords = np.append(Coords,z_coords,axis=1)
@@ -164,8 +170,22 @@ class DistortionCalculation:
 			CentreOfSphere = [sum(x_coords) / len(points[idx]),sum(y_coords) / len(points[idx]),sum(z_coords) / len(points[idx])]
 			Spheres.append(CentreOfSphere)
 
-			#print (CentreOfSphere)
+			radii = [ (max(x_coords)-min(x_coords))*self.VoxelSize[2],(max(y_coords)-min(y_coords))*self.VoxelSize[0],(max(z_coords)-min(z_coords))*self.VoxelSize[1] ]
+			if max(radii)>=self.radiiWarning:
+				self.BinaryWarning=True
+
 		
+		LowestDist = int(sys.maxsize)
+		for centre1 in Spheres:
+			for centre2 in Spheres:
+				dist = math.sqrt( ((centre1[0]-centre2[0])*self.VoxelSize[2])**2 + ((centre1[1]-centre2[1])*self.VoxelSize[0])**2 + ((centre1[2]-centre2[2])*self.VoxelSize[1])**2)
+				if dist>0:
+					if dist < LowestDist:
+						LowestDist=dist
+		print(LowestDist)
+		if (LowestDist<=self.CloseSphereDist):
+			self.BinaryWarning=True
+
 		'''
 		#DebugPlot
 		for I in range(SliceLocCentre-SearchSize,SliceLocCentre+SearchSize):
@@ -178,7 +198,6 @@ class DistortionCalculation:
 				plt.plot(xyz[0], xyz[1], 'b+')
 			plt.show()
 		'''
-		
 		
 		#Return all the coords
 		return Spheres

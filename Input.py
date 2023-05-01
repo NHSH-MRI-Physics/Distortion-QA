@@ -18,7 +18,7 @@ ComputeDistortion.checkBinaryImages=False
 ComputeDistortion.BinariseMethod = "Constant"
 #Set up the analysis script, this takes the computed distacnes and output metrics. Pass a tag for the calculaton (used for naming saved images etc) and the previously constructed distirtion calc class
 Analyse = Analysis.AnalysisResults("FlippedData",ComputeDistortion)
-ComputeDistortion.Threshold=5000
+ComputeDistortion.Threshold=6000
 #Call this function to get all the centre of the distances
 ComputeDistortion.GetFudicalSpheres()
 

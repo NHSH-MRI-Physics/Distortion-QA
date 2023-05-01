@@ -74,3 +74,4 @@ class SNR():
 		S = np.mean(Signal)
 		SNR = S/N*0.66
 		print ("SNR: " + str(SNR))
+		return SNR
