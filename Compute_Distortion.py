@@ -50,7 +50,7 @@ class DistortionCalculation:
 		self.SphereLocations=None
 		self.InterPlateResults=None
 		self.IntraPlateResults=None
-		self.folder= './'+folder+'/*'
+		self.folder= os.path.join(folder,'*')
 		self.SequenceName= SequenceName
 		self.Studydate=None
 		self.searchWidth = 4.688
@@ -63,6 +63,8 @@ class DistortionCalculation:
 		self.radiiWarning=15
 		self.CloseSphereDist=20
 		self.BinaryWarning=False
+		self.BinaryWarningThreshToLow=False
+		self.BinaryWarningThreshToHigh=False
 		
 	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -173,6 +175,7 @@ class DistortionCalculation:
 			radii = [ (max(x_coords)-min(x_coords))*self.VoxelSize[2],(max(y_coords)-min(y_coords))*self.VoxelSize[0],(max(z_coords)-min(z_coords))*self.VoxelSize[1] ]
 			if max(radii)>=self.radiiWarning:
 				self.BinaryWarning=True
+				self.BinaryWarningThreshToLow = True
 
 		
 		LowestDist = int(sys.maxsize)
@@ -182,9 +185,10 @@ class DistortionCalculation:
 				if dist>0:
 					if dist < LowestDist:
 						LowestDist=dist
-		print(LowestDist)
+		#print(LowestDist)
 		if (LowestDist<=self.CloseSphereDist):
 			self.BinaryWarning=True
+			self.BinaryWarningThreshToHigh = True
 
 		'''
 		#DebugPlot
