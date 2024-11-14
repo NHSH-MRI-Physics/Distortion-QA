@@ -65,6 +65,7 @@ class DistortionCalculation:
 		self.BinaryWarning=False
 		self.BinaryWarningThreshToLow=False
 		self.BinaryWarningThreshToHigh=False
+		self.ErrorMetric = 0
 		
 	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -176,6 +177,7 @@ class DistortionCalculation:
 			if max(radii)>=self.radiiWarning:
 				self.BinaryWarning=True
 				self.BinaryWarningThreshToLow = True
+				self.ErrorMetric+=1
 
 		
 		LowestDist = int(sys.maxsize)
@@ -189,6 +191,7 @@ class DistortionCalculation:
 		if (LowestDist<=self.CloseSphereDist):
 			self.BinaryWarning=True
 			self.BinaryWarningThreshToHigh = True
+			self.ErrorMetric+=1
 
 		'''
 		#DebugPlot

@@ -21,6 +21,3 @@ NoDistortionAnalysis.DistortionAnalysis()
 
 #Call this function to print the computed metrics to screen
 NoDistortionAnalysis.PrintToScreen()
-
-print(ComputeDistortionGeoCorrection.BinaryWarningThreshToHigh)
-print(ComputeDistortionGeoCorrection.BinaryWarningThreshToLow)
