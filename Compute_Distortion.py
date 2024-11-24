@@ -66,6 +66,18 @@ class DistortionCalculation:
 		self.BinaryWarningThreshToLow=False
 		self.BinaryWarningThreshToHigh=False
 		self.ErrorMetric = 0
+
+
+		self.DICOMFiles = glob.glob(self.folder)
+		ExtractedSequence = self.SequenceName
+		
+		#Load in all DICOM files and make sure its the right sequence 
+		self.DICOMS=[]
+		for file in self.DICOMFiles:
+			LoadedDICOM = pydicom.read_file( file )
+			if (LoadedDICOM.SeriesDescription == ExtractedSequence):
+				self.DICOMS.append(LoadedDICOM)
+		self.DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False) # sort them by slice 
 		
 	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -722,29 +734,20 @@ class DistortionCalculation:
 	#the user calls this to get the sphere locations
 	def GetFudicalSpheres(self):
 		#get all the DICOM files
-		DICOMFiles = glob.glob(self.folder)
-		ExtractedSequence = self.SequenceName
-		
-		#Load in all DICOM files and make sure its the right sequence 
-		DICOMS=[]
-		for file in DICOMFiles:
-			LoadedDICOM = pydicom.read_file( file )
-			if (LoadedDICOM.SeriesDescription == ExtractedSequence):
-				DICOMS.append(LoadedDICOM)
-		DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False) # sort them by slice 
+
 	
 	
 		#Put it into a 3d array for slicing and get some settings
-		img_shape = list(DICOMS[0].pixel_array.shape) #Axial, Cor, Sag (i think)
-		VoxelSize = [DICOMS[0].PixelSpacing[0],DICOMS[0].PixelSpacing[1],DICOMS[0].SpacingBetweenSlices] #Axial, Cor, Sag (i think)
-		img_shape.append(len(DICOMS))
+		img_shape = list(self.DICOMS[0].pixel_array.shape) #Axial, Cor, Sag (i think)
+		VoxelSize = [self.DICOMS[0].PixelSpacing[0],self.DICOMS[0].PixelSpacing[1],self.DICOMS[0].SpacingBetweenSlices] #Axial, Cor, Sag (i think)
+		img_shape.append(len(self.DICOMS))
 		img3d = np.zeros(img_shape)
-		for i, s in enumerate(DICOMS):
+		for i, s in enumerate(self.DICOMS):
 			img2d = s.pixel_array
 			img3d[:, :, i] = img2d
 			
 		#Get the datetime of the study
-		LoadedDICOM = pydicom.dcmread( DICOMFiles[0] )
+		LoadedDICOM = pydicom.dcmread( self.DICOMFiles[0] )
 		date= (LoadedDICOM["AcquisitionDate"])
 		time= (LoadedDICOM["AcquisitionTime"])
 		year = int(date[0:4])

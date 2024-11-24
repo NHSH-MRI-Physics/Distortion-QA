@@ -356,7 +356,8 @@ class AnalysisResults:
 			if (result.ExpectedDistance == 40):
 				Distortion.append(result.Distance)
 		#use the scipy function to get the coefficant of variation
-		return scipy.stats.variation(Distortion)
+		#Turns out the order of operations effects floating point accuracy! So if we make it sorted it keeps it consistent...
+		return scipy.stats.variation(sorted(Distortion))
 	
 	
 	
