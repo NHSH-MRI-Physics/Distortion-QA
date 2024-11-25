@@ -5,7 +5,7 @@ import Compute_Distortion
 import sys
 import SNRCalc
 
-ComputeDistortion = Compute_Distortion.DistortionCalculation("TestData" , "3D Sag T1 BRAVO Geom Core") 
+ComputeDistortion = Compute_Distortion.DistortionCalculation(".\TestData\NormTestData" , "3D Sag T1 BRAVO Geom Core") 
 ComputeDistortion.BinariseMethod = "Constant"
 Analyse = Analysis.AnalysisResults("FlippedData",ComputeDistortion)
 ComputeDistortion.Threshold=3000

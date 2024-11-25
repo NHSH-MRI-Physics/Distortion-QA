@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 #Compute distortion on one sequence
 #Set up the distortion calc by passing the folder with all the DICOMS and the sequence of interest.
-ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation("TestData" , "3D Sag T1 BRAVO Geom Core") 
+ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation(".\TestData\NormTestData" , "3D Sag T1 BRAVO Geom Core") 
 #need this bit to run the loading part
 ComputeDistortionGeoCorrection.GetFudicalSpheres()
 

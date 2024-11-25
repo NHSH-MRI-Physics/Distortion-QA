@@ -6,7 +6,7 @@ import sys
 import SNRCalc
 
 #Set up the distortion calc by passing the folder with all the DICOMS and the sequence of interest.
-ComputeDistortion = Compute_Distortion.DistortionCalculation("TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off") 
+ComputeDistortion = Compute_Distortion.DistortionCalculation(".\TestData\TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off") 
 
 #The isaldnChecker method is a bit more sensitive to background noise so its usually good to shortern the search width
 #ComputeDistortion.searchWidth = 3.9

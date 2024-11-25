@@ -11,7 +11,7 @@ if os.path.exists("DistortionData.csv"):
 
 #Compute distortion on one sequence
 #Set up the distortion calc by passing the folder with all the DICOMS and the sequence of interest.
-ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation("TestData" , "3D Sag T1 BRAVO Geom Core") 
+ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation(".\TestData\NormTestData" , "3D Sag T1 BRAVO Geom Core") 
 
 #Set up the analysis script, this takes the computed distacnes and output metrics. Pass a tag for the calculaton (used for naming saved images etc) and the previously constructed distirtion calc class
 NoDistortionAnalysis = Analysis.AnalysisResults("No_Distortion",ComputeDistortionGeoCorrection)
@@ -37,7 +37,7 @@ NoDistortionAnalysis.OutputPeriodicData("DistortionData.csv")
 
 #Compute distortion on another sequence (this could be in another file)
 #Set up the distortion calc by passing the folder with all the DICOMS and the sequence of interest.
-ComputeNoCorrection = Compute_Distortion.DistortionCalculation("TestDataNoCor" , "3D Sag T1 BRAVO") 
+ComputeNoCorrection = Compute_Distortion.DistortionCalculation(".\TestData\TestDataNoCor" , "3D Sag T1 BRAVO") 
 
 #Set up the analysis script, this takes the computed distacnes and output metrics. Pass a tag for the calculaton (used for naming saved images etc) and the previously constructed distirtion calc class
 NoCorrectionAnalysis = Analysis.AnalysisResults("No_Correction",ComputeNoCorrection)
@@ -61,7 +61,7 @@ NoCorrectionAnalysis.OutputPeriodicData("DistortionData.csv")
 
 #Compute distortion on another sequence (this could be in another file)
 #Set up the distortion calc by passing the folder with all the DICOMS and the sequence of interest.
-ComputeDistortion = Compute_Distortion.DistortionCalculation("TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off") 
+ComputeDistortion = Compute_Distortion.DistortionCalculation(".\TestData\TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off") 
 
 #Set up the analysis script, this takes the computed distacnes and output metrics. Pass a tag for the calculaton (used for naming saved images etc) and the previously constructed distirtion calc class
 DistortionAnalysis = Analysis.AnalysisResults("Distorted",ComputeDistortion)
