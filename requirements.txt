@@ -7,3 +7,4 @@ pydicom==2.4.4
 scikit_learn==0.24.1
 scipy==1.10.0
 streamlit==1.34.0
+scikit-image==0.21.0
