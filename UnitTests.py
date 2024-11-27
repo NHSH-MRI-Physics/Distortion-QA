@@ -6,9 +6,11 @@ from scipy.optimize import minimize_scalar
 from scipy.optimize import show_options
 import unittest
 import numpy as np
+import os 
 class TestDistortion(unittest.TestCase):
     def testNormal(self):
-        ComputeDist = Compute_Distortion.DistortionCalculation(".\\TestData\\NormTestData" , "3D Sag T1 BRAVO Geom Core") 
+        path = os.path.join(os.getcwd(),"TestData","NormTestData")
+        ComputeDist = Compute_Distortion.DistortionCalculation(path, "3D Sag T1 BRAVO Geom Core") 
         ComputeDist.BinariseMethod = "Constant"
         ComputeDist.Threshold=int(3000)
         AnalysisObj = Analysis.AnalysisResults("No_Distortion",ComputeDist)
@@ -38,7 +40,8 @@ class TestDistortion(unittest.TestCase):
         self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][3], 0.001197094586304424)
 
     def testNoCor(self):
-        ComputeDist = Compute_Distortion.DistortionCalculation(".\\TestData\\TestDataNoCor" , "3D Sag T1 BRAVO") 
+        path = os.path.join(os.getcwd(),"TestData","TestDataNoCor")
+        ComputeDist = Compute_Distortion.DistortionCalculation(path , "3D Sag T1 BRAVO") 
         ComputeDist.BinariseMethod = "Constant"
         ComputeDist.Threshold=int(3000)
         AnalysisObj = Analysis.AnalysisResults("No_Correction",ComputeDist)
@@ -68,7 +71,8 @@ class TestDistortion(unittest.TestCase):
         self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][3], 0.007298502469600538)
 
     def testDist(self):
-        ComputeDist  = Compute_Distortion.DistortionCalculation(".\\TestData\\TestDistoredData" , "3D Sag T1 BRAVO BW=15 Shim off") 
+        path = os.path.join(os.getcwd(),"TestData","TestDistoredData")
+        ComputeDist  = Compute_Distortion.DistortionCalculation(path, "3D Sag T1 BRAVO BW=15 Shim off") 
         ComputeDist.BinariseMethod = "Constant"
         ComputeDist.Threshold=int(3000)
         AnalysisObj = Analysis.AnalysisResults("Distortion",ComputeDist)
