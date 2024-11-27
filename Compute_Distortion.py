@@ -78,6 +78,13 @@ class DistortionCalculation:
 			if (LoadedDICOM.SeriesDescription == ExtractedSequence):
 				self.DICOMS.append(LoadedDICOM)
 		self.DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False) # sort them by slice 
+
+	def GetMaxPixel(self):
+		maxpixels=[]
+		for i, s in enumerate(self.DICOMS):
+			maxpixels.append( np.max(s.pixel_array) )
+		return np.max(maxpixels)
+
 		
 	#a function that is designed to adjust points  (should they be detected wrong)
 	def AdjustPoint(self,PointGuess,NewPoint):
@@ -733,10 +740,6 @@ class DistortionCalculation:
 		
 	#the user calls this to get the sphere locations
 	def GetFudicalSpheres(self):
-		#get all the DICOM files
-
-	
-	
 		#Put it into a 3d array for slicing and get some settings
 		img_shape = list(self.DICOMS[0].pixel_array.shape) #Axial, Cor, Sag (i think)
 		VoxelSize = [self.DICOMS[0].PixelSpacing[0],self.DICOMS[0].PixelSpacing[1],self.DICOMS[0].SpacingBetweenSlices] #Axial, Cor, Sag (i think)

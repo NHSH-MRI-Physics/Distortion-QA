@@ -18,6 +18,7 @@ class TestDistortion(unittest.TestCase):
 
         ComputeDist.GetDistances()
         AnalysisObj.DistortionAnalysis()
+        #AnalysisObj.PrintToScreen()
 
         self.assertEqual(AnalysisObj.Results["Interplate Max Distortion"][0], 0.4539283722220375)
         self.assertEqual(AnalysisObj.Results["Interplate Max Percentage Distortion"][0], -0.6146744110059288)
@@ -49,6 +50,7 @@ class TestDistortion(unittest.TestCase):
 
         ComputeDist.GetDistances()
         AnalysisObj.DistortionAnalysis()
+        #AnalysisObj.PrintToScreen()
 
         self.assertEqual(AnalysisObj.Results["Interplate Max Distortion"][0], 2.0433243523222586)
         self.assertEqual(AnalysisObj.Results["Interplate Max Percentage Distortion"][0], -2.6544179829351364)
@@ -74,29 +76,52 @@ class TestDistortion(unittest.TestCase):
         path = os.path.join(os.getcwd(),"TestData","TestDistoredData")
         ComputeDist  = Compute_Distortion.DistortionCalculation(path, "3D Sag T1 BRAVO BW=15 Shim off") 
         ComputeDist.BinariseMethod = "Constant"
-        ComputeDist.Threshold=int(3000)
+        ComputeDist.Threshold=int(6000)
         AnalysisObj = Analysis.AnalysisResults("Distortion",ComputeDist)
         ComputeDist.GetFudicalSpheres()
 
         ComputeDist.GetDistances()
         AnalysisObj.DistortionAnalysis()
 
-        self.assertEqual(AnalysisObj.Results["Interplate Max Distortion"][0], 29.038806321881943)
-        self.assertEqual(AnalysisObj.Results["Interplate Max Percentage Distortion"][0], -32.466372460589334 )
-        self.assertEqual(AnalysisObj.Results["Interplate Coefficient Of Variation"], 0.051824509587756355)
+
+        '''
+        print(AnalysisObj.Results["Interplate Max Distortion"][0])
+        print(AnalysisObj.Results["Interplate Max Percentage Distortion"][0])
+        print(AnalysisObj.Results["Interplate Coefficient Of Variation"])
+        print("")
+        print(AnalysisObj.Results["Intraplate Max Distortion"][0][0])
+        print(AnalysisObj.Results["Intraplate Max Percentage Distortion"][0][0])
+        print(AnalysisObj.Results["Intraplate Coefficient Of Variation"][0])
+        print("")
+        print(AnalysisObj.Results["Intraplate Max Distortion"][1][0])
+        print(AnalysisObj.Results["Intraplate Max Percentage Distortion"][1][0])
+        print(AnalysisObj.Results["Intraplate Coefficient Of Variation"][1])
+        print("")
+        print(AnalysisObj.Results["Intraplate Max Distortion"][2][0])
+        print(AnalysisObj.Results["Intraplate Max Percentage Distortion"][2][0])
+        print(AnalysisObj.Results["Intraplate Coefficient Of Variation"][2])
+        print("")
+        print(AnalysisObj.Results["Intraplate Max Distortion"][3][0])
+        print(AnalysisObj.Results["Intraplate Max Percentage Distortion"][3][0])
+        print(AnalysisObj.Results["Intraplate Coefficient Of Variation"][3])
+        '''
+
+        self.assertEqual(AnalysisObj.Results["Interplate Max Distortion"][0], 7.2642853534775895)
+        self.assertEqual(AnalysisObj.Results["Interplate Max Percentage Distortion"][0], -4.147574917287247 )
+        self.assertEqual(AnalysisObj.Results["Interplate Coefficient Of Variation"], 0.002917963346640256)
   
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][0][0], 9.935363332545535)
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][0][0],-11.108073896365331 )
-        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][0], 0.017338008066554614)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][0][0], 2.3033208617031704)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][0][0],-2.879151077128963)
+        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][0], 0.017374702713103783)
 
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][1][0], 4.517836566837872)
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][1][0],-3.075268812737999)
-        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][1], 0.0189254984908528)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][1][0], 4.544180964425323)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][1][0],-3.1022241250630245)
+        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][1], 0.019149344398084977)
 
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][2][0], 5.699496091462407)
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][2][0],-4.883586331946166)
-        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][2], 0.13641222042125206)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][2][0], 5.695226195725581)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][2][0],-4.923136939143298)
+        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][2], 0.018273303593129703)
 
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][3][0],44.62937309275635)
-        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][3][0],-51.035135369740445)
-        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][3], 0.18601857949879502)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Distortion"][3][0],4.679542071049781)
+        self.assertEqual(AnalysisObj.Results["Intraplate Max Percentage Distortion"][3][0],-3.015413653574015)
+        self.assertEqual(AnalysisObj.Results["Intraplate Coefficient Of Variation"][3], 0.02167617956103792)
