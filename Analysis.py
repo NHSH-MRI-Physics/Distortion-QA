@@ -89,8 +89,6 @@ class AnalysisResults:
 		ax.set_ylabel('y', fontsize=20)
 		ax.set_xlabel('x', fontsize=20)
 		
-		
-	
 		colours = ["r","g","b","m","y"] # List of colours so each plate gets coloured differently
 		count =0
 		MidPoint = [self.DistorCalcObj.img_shape[0]/2.0,self.DistorCalcObj.img_shape[1]/2.0,self.DistorCalcObj.img_shape[2]/2.0] #Not used but i kept it in case we want to adjust distances to the mid point

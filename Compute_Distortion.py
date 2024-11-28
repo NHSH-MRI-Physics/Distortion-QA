@@ -54,7 +54,7 @@ class DistortionCalculation:
 		self.SequenceName= SequenceName
 		self.Studydate=None
 		self.searchWidth = 4.688
-		
+		self.Scanner = None
 		self.BinariseMethod = "Min"
 		self.Threshold=3000
 		self.ratio=0.3
@@ -75,6 +75,7 @@ class DistortionCalculation:
 		self.DICOMS=[]
 		for file in self.DICOMFiles:
 			LoadedDICOM = pydicom.read_file( file )
+			self.Scanner = LoadedDICOM[0x08,0x80].value
 			if (LoadedDICOM.SeriesDescription == ExtractedSequence):
 				self.DICOMS.append(LoadedDICOM)
 		self.DICOMS.sort(key=lambda x: x.SliceLocation, reverse=False) # sort them by slice 
