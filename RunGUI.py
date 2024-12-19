@@ -1,5 +1,3 @@
-#Basic example input file, for more complete description refer to the manual
-
 import Analysis
 import Compute_Distortion
 import sys
@@ -10,33 +8,12 @@ import pandas as pd
 import numpy as np
 import time 
 import glob
-
-dir = "DataSets"
-seqname = "3D Sag T1 BRAVO Geom Core"
-seqname = "3D Sag T1 BRAVO BW=15 Shim off"
 st.title('Distortion Calculation')
 
-folders = os.listdir(dir)
-dates=[]
-filecount = []
-FoldersToDisplay=[]
-for folder in folders:
-    if folder[0]!='.':
-        FoldersToDisplay.append(folder)
-        dates.append( time.ctime( os.stat(os.path.join(dir,folder)).st_mtime ))
-        filecount.append(len(os.listdir(os.path.join(dir,folder))))
-
-options = st.multiselect(
-'Select a dataset',
-FoldersToDisplay)
-df = pd.DataFrame()
-df['Data Sets'] = FoldersToDisplay
-df['Dates'] = dates
-df['Number of Files'] = filecount
-st.table(df)
 
 
-
+path = st.text_input('File Path')
+seqname = st.text_input('Sequence Name', "3D Sag T1 BRAVO DL")
 Thresh = st.text_input('Threshold', '3000')
 col1, col2 = st.columns(2)
 with col1:
@@ -45,26 +22,39 @@ with col2:
      BinaryImages = st.checkbox('OutputBinaryImages')
 
 if button:
-    if len(options)>1 or len(options)==0:
-        st.error('Error choose exactly one dataset', icon="🚨")
+    if path == "":
+        st.error('Error: full path needs to be set', icon="🚨")
     else:
-            dataset = os.path.join(dir,options[0])
+            dataset = path
             ComputeDistortion = Compute_Distortion.DistortionCalculation(dataset , seqname) 
             ComputeDistortion.BinariseMethod = "Constant"
             Analyse = Analysis.AnalysisResults("GUI_RUN",ComputeDistortion)
             ComputeDistortion.Threshold=int(Thresh)
             if BinaryImages:
-                files = glob.glob(os.path.join('BinaryImages','*'))
-                for f in files:
+               files = glob.glob(os.path.join('BinaryImages','*'))
+               
+               if not os.path.exists("BinaryImages"):
+                    os.makedirs("BinaryImages")
+
+               for f in files:
                     os.remove(f)
-                ComputeDistortion.checkBinaryImages=True
+               ComputeDistortion.checkBinaryImages=True
+
             ComputeDistortion.GetFudicalSpheres()
             ComputeDistortion.GetDistances()
             Analyse.DistortionAnalysis()
 
             SNR = SNRCalc.SNR(ComputeDistortion)
             SNRResult = SNR.ComputerSNR()
-            
+
+            if ComputeDistortion.BinaryWarningThreshToLow and ComputeDistortion.BinaryWarningThreshToLow:
+                 st.error('Warning: Large Radius and short distances detected try a different threshold!', icon="🚨")
+            elif ComputeDistortion.BinaryWarningThreshToLow:
+                 st.error('Warning: Large Radius detected try increasing threshold!', icon="🚨")
+            elif ComputeDistortion.BinaryWarningThreshToHigh:
+                 st.error('Warning: Short distances found, try decreasing the threshold!', icon="🚨")
+                 
+
             st.write( "Study Date: " + str(Analyse.DistorCalcObj.Studydate) )
             st.write( "Interplate Stats") 
             st.write("Interplate Max Distortion: " + str(round(Analyse.Results["Interplate Max Distortion"][0],3)) +" mm")
@@ -78,10 +68,6 @@ if button:
 
             st.write("SNR: " + str(round(SNRResult,3)))
             st.session_state.disabled=False
-
-            if ComputeDistortion.BinaryWarning:
-                 st.error('Warning: Large Radius or Overlapping Sphere Detected, Check the Binary Images!', icon="🚨")
-
             
             img1=st.image("GUI_RUN_InterplateDistances.png")
             img2=st.image("GUI_RUN_Plate_1_IntraPlateDist.png")

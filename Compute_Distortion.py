@@ -181,6 +181,8 @@ class DistortionCalculation:
 		#sys.exit()
 		
 		Spheres = []
+		if len(points) < NumberOfSpheresExpected:
+			raise ValueError("Not enough points after thresholding, the threshold is probably to high!")
 		kmeans = KMeans(n_clusters=NumberOfSpheresExpected, random_state=0).fit(points)# use this to cluster the points into each sphere
 		
 		
@@ -208,7 +210,7 @@ class DistortionCalculation:
 					if dist < LowestDist:
 						LowestDist=dist
 		#print(LowestDist)
-		if (LowestDist<=self.CloseSphereDist):
+		if (LowestDist<self.CloseSphereDist):
 			self.BinaryWarning=True
 			self.BinaryWarningThreshToHigh = True
 			self.ErrorMetric+=1
