@@ -1,1 +1,1 @@
-see DetectionScript_Manual.pdf for manual
+See DetectionScript_Manual.pdf for manual
