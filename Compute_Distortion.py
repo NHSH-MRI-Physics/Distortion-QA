@@ -65,6 +65,7 @@ class DistortionCalculation:
 		self.BinaryWarning=False
 		self.BinaryWarningThreshToLow=False
 		self.BinaryWarningThreshToHigh=False
+		self.ThreshErrorCounts = 0
 		self.ErrorMetric = 0
 
 
@@ -199,7 +200,8 @@ class DistortionCalculation:
 			if max(radii)>=self.radiiWarning:
 				self.BinaryWarning=True
 				self.BinaryWarningThreshToLow = True
-				self.ErrorMetric+=1
+				self.ThreshErrorCounts+=1
+				self.ErrorMetric += max(radii) - self.radiiWarning
 
 		
 		LowestDist = int(sys.maxsize)
@@ -213,7 +215,8 @@ class DistortionCalculation:
 		if (LowestDist<self.CloseSphereDist):
 			self.BinaryWarning=True
 			self.BinaryWarningThreshToHigh = True
-			self.ErrorMetric+=1
+			self.ThreshErrorCounts+=1
+			self.ErrorMetric += self.CloseSphereDist - LowestDist
 
 		'''
 		#DebugPlot
