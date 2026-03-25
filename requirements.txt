@@ -4,7 +4,7 @@ opencv_python==4.5.5.64
 opencv_python_headless==4.6.0.66
 pandas==2.0.3
 pydicom==2.4.5
-scikit_learn==0.24.1
+scikit_learn
 scipy==1.10.0
 streamlit==1.37.0
 scikit-image
