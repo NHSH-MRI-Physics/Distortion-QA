@@ -6,7 +6,7 @@ import sys
 ComputeDistortionGeoCorrection = Compute_Distortion.DistortionCalculation(r".\TestData\NormTestData" , "3D Sag T1 BRAVO Geom Core") 
 
 #Set up the analysis script, this takes the computed distacnes and output metrics. Pass a tag for the calculaton (used for naming saved images etc) and the previously constructed distirtion calc class
-NoDitsortionAnalysis = Analysis.AnalysisResults("No_Distortion",ComputeDistortionGeoCorrection)
+NoDistortionAnalysis = Analysis.AnalysisResults("No_Distortion",ComputeDistortionGeoCorrection)
 
 #Call this function to get all the centre of the distances
 ComputeDistortionGeoCorrection.GetFudicalSpheres()
